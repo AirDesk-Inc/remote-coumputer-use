@@ -1,8 +1,14 @@
 # Remote Terminal
 
-The two-computer gate and explicit task authorization must pass first. All tools
+The controller MCP gate and explicit task authorization must pass first. All tools
 below operate on the connected **target**, through AirDesk's native transport and
 host permissions. They are not a way to run a shell locally or bypass MCP OFF.
+
+Only the controller needs MCP ON. If target Remote Terminal is OFF, ask the user
+to enable **Remote Terminal in the target's AirDesk hosting settings** and wait
+for confirmation. Do not request target MCP activation or enable permissions
+silently. `terminal_unavailable` / missing support may also indicate an outdated
+or unsupported host: verify compatibility, then reconnect/recheck after enabling.
 
 | Tool | Arguments / behavior |
 | --- | --- |

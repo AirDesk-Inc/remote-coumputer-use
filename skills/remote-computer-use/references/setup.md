@@ -5,24 +5,74 @@
 | Requirement | Controller | Target |
 | --- | --- | --- |
 | Compatible AirDesk desktop app installed | Required | Required |
-| MCP mode ON in AirDesk | Required | Required |
-| Remote Terminal ON in AirDesk | Required | Required |
+| MCP mode ON in AirDesk | Required | Not required |
+| Remote Terminal ON in AirDesk | Not required | Required |
 | Signed-in account / approved access | Sign in | Allow the intended user and required permissions |
 | Host running and sharing enabled | Only if also hosting | Required |
 
-Get AirDesk from the [official website](https://airdesk.co.kr). This repository
-does not contain the app, a remote agent installer, or a replacement MCP server.
+Get AirDesk from the [official website](https://airdesk.co.kr).
 An older app without MCP/Remote Terminal settings is not compatible; update it.
 No minimum public app version is asserted here. Tool discovery and the diagnostic
 check compatibility with the installed build.
 
-In the AirDesk app, enable **Remote Terminal**, then **MCP mode** on each computer.
-Labels/placement can vary by app version. If settings are unavailable, stop; do
-not edit settings files to simulate consent. Restart the MCP client/server after
+Enable **MCP mode** on the controller only. The target needs **Remote Terminal**
+enabled for terminal and Windows automation tools. If it is OFF, ask its owner
+to enable it in AirDesk hosting settings and wait for confirmation. Target MCP
+may stay OFF. The authorized installer can enable controller MCP automatically using
+AirDesk's native setup command, without enabling local terminal hosting.
+Labels/placement can vary by app version. If settings are unavailable, update the
+app; do not edit settings files to simulate consent. Restart the MCP client/server after
 signing in or updating the app. Do not run the MCP server as root/administrator
 just to avoid an access error.
 
 ## 2. Install the Skill
+
+Ask your AI agent:
+
+> Install https://github.com/AirDesk-Inc/remote-coumputer-use.git.
+> Register AirDesk's native MCP server and enable MCP mode on this computer.
+> Leave local Remote Terminal hosting unchanged.
+
+The installer requires Node.js 22+. From a checkout, run:
+
+```sh
+npm ci --ignore-scripts
+node bin/cli.mjs install
+```
+
+After the package's first npm publication, the equivalent is:
+
+```sh
+npx @airdesk/remote-computer-use install
+```
+
+The npm package is currently prepared, not published. The default installation
+copies the skill into `~/.agents/skills/remote-computer-use`, preserves other
+Codex configuration, and registers the installed AirDesk executable. The config
+defaults to `$CODEX_HOME/config.toml` or `~/.codex/config.toml`.
+
+| Option | Effect |
+| --- | --- |
+| `--binary PATH` | Absolute trusted AirDesk executable or macOS `.app` path; required on Windows. |
+| `--skills-dir PATH` | Alternative parent skill directory. |
+| `--config PATH` | Alternative Codex TOML configuration file. |
+| `--dry-run` | Plan only; no AirDesk execution or writes. |
+| `--skip-mcp` | Copy only the skill; do not register MCP or change AirDesk. |
+
+Existing identical installs are kept; differing skills or conflicting MCP
+entries are not overwritten. Resolve conflicts explicitly before rerunning.
+Reload your MCP client after installation. Other MCP clients can use
+`--skip-mcp` and the manual configuration below.
+
+Automatic enabling requires an updated AirDesk build supporting the read-only
+`--mcp-server --mcp-setup` query and one-shot
+`--mcp-server --mcp-setup --enable-mcp` operation. The installer checks the native
+capability before writing. It never directly edits AirDesk's settings or changes
+terminal hosting. The recurring server command remains **only `--mcp-server`**:
+MCP OFF is not silently reversed on restart. Older builds require an update or
+manual MCP activation in the app.
+
+### Manual Installation
 
 Clone the public repository to a location you control:
 
@@ -138,10 +188,12 @@ printed. The helper ignores inherited `REPC_STATE_DIR`, `REPC_MCP_AUTH_TOKEN`, a
 `REPC_BACKEND_URL` test overrides so it checks the normal app profile. It does not
 verify code signatures: run only a trusted installed executable.
 
-**`targetVerified` is always false.** Run a local check on each computer or have
-the target owner confirm installation, MCP ON, Remote Terminal ON, and access.
-The controller's `remote_status` cannot attest the target's MCP setting. This
-skill requires that separate confirmation before `remote_connect`.
+**`targetVerified` is always false.** Verify target installation, host sharing and
+approved access separately. Do not use the local diagnostic to require target
+MCP activation: target MCP is not needed. If `terminalAdvertised` or
+`terminalSupported` is false, ask the user to check target Remote Terminal.
+These flags can also be false on unsupported/outdated hosts, so do not diagnose
+OFF solely from a capability flag. After enabling, reconnect/recheck if needed.
 
 ## Troubleshooting
 
@@ -149,11 +201,14 @@ skill requires that separate confirmation before `remote_connect`.
 | --- | --- |
 | `airdesk_not_installed_at_path` | Install AirDesk or provide its exact trusted path. |
 | `required_tools_missing` | Update the app; make sure this is AirDesk's native server. |
-| MCP / Remote Terminal flag false | Enable both in the AirDesk app on each computer. |
+| MCP flag false | Enable MCP in AirDesk or explicitly rerun the authorized installer. |
+| `remoteTerminalEnabled: false` locally | Expected for a controller-only PC; no change needed. The target still needs terminal permission. |
+| `native_app_update_required` | Update AirDesk or use manual installation and activation. |
 | `credentialAvailable: false` | Sign in through the controller app, restart MCP, retry. |
 | `unsupported_protocol_version` | Update the app/helper; do not bypass negotiation. |
 | `response_timeout` / invalid protocol | Restart the MCP process, verify app compatibility. Do not publish raw logs. |
-| Target cannot be verified | Ask its owner to check setup locally; do not connect yet. |
+| Target access cannot be verified | Ask its owner to confirm sharing/access; do not connect yet. |
+| Target Remote Terminal OFF | Ask the owner to enable it in target AirDesk hosting settings, then confirm/recheck. Target MCP is not required. |
 | Connection denied / host unavailable | Verify hosting, sharing approval, network and target settings in AirDesk. |
 | Screenshot present, input unavailable | Check `inputReady`, selected display and permissions; do not spam input. |
 | Windows automation unsupported | Use approved screenshot/input tools if available; no permission bypass. |

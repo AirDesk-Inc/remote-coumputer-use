@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/remote-computer-use.png" alt="AirDesk Remote Computer Use. 제어 PC와 대상 PC 모두 AirDesk 설치, MCP 모드 ON, 원격 터미널 ON 필수." width="1200">
+  <img src="docs/assets/remote-computer-use.png" alt="양쪽 모두 AirDesk 설치. 클라이언트는 MCP ON, 대상 호스트는 원격 터미널 ON." width="1200">
 </p>
 
 # AirDesk Remote Computer Use
@@ -11,8 +11,10 @@ AirDesk의 네이티브 MCP 서버를 통해 허가된 원격 컴퓨터의 화�
 오픈소스 **Agent Skill**입니다.
 
 > **제어하는 컴퓨터와 대상 컴퓨터 모두 AirDesk가 설치되어 있어야 하며,
-> 양쪽 모두 MCP 모드가 ON이어야 합니다.**
-> 원격 터미널도 양쪽에서 켜야 합니다. 대상 PC의 호스트 실행·공유·접근 승인도
+> MCP 모드는 클라이언트에서만 ON이면 됩니다.**
+> 클라이언트는 MCP 모드만 켜면 됩니다. 원격 터미널 허용은 대상 PC에서만 필요합니다.
+> 대상 호스트의 MCP 모드는 꺼져 있어도 됩니다. 호스트 원격 터미널이 OFF이면
+> AI가 켜 달라고 요청한 뒤 터미널·창 자동화를 진행합니다. 호스트 실행·공유·접근 승인도
 > 필요합니다. 이 조건을 충족하지 않으면 사용할 수 없습니다.
 > 이 저장소만으로 원격 제어 서버가 설치되거나 실행되지는 않습니다.
 
@@ -20,43 +22,54 @@ AirDesk의 네이티브 MCP 서버를 통해 허가된 원격 컴퓨터의 화�
 
 - 동의 확인, 좌표 변환, 결과 검증, 정리 절차를 포함한 [스킬](skills/remote-computer-use/SKILL.md)
 - 외부 Python 패키지 없이 동작하는 로컬 진단·MCP 설정 출력 도구
+- 스킬 설치·네이티브 MCP 등록·클라이언트 MCP 모드 활성화를 수행하는 npm 설치기
 - 설치 문서, 보안 지침, 회귀 테스트와 CI
 - 기존 AirDesk 로고 및 Figma로 제작한 저장소 표지
 
-AirDesk 앱 본체, 백엔드, 네이티브 MCP 서버 구현, 드라이버, 계정 정보 및
-비공개 제품 소스는 포함하지 않습니다.
-
 ## 시작하기
 
-1. 양쪽 PC에 호환되는 [AirDesk 데스크톱 앱](https://airdesk.co.kr)을 설치합니다.
-2. 양쪽 앱에서 **원격 터미널**과 **MCP 모드**를 켭니다. 제어 PC에서 로그인하고,
-   대상 PC에서 호스트·공유 및 해당 사용자의 접근 권한을 확인합니다.
-3. 아래 저장소를 받아 `skills/remote-computer-use` 폴더를 사용 중인 AI 클라이언트의
-   스킬 경로에 설치합니다. Codex 사용자 경로는 `~/.agents/skills/`입니다.
-4. 제어 PC에 설치된 AirDesk 실행 파일을 stdio MCP 서버로 등록합니다.
+양쪽 PC에 [AirDesk](https://airdesk.co.kr)를 설치한 뒤,
+**AI에게 이 GitHub 주소를 설치해 달라고 요청하세요.**
+
+> https://github.com/AirDesk-Inc/remote-coumputer-use.git 를 설치해줘.
+> 이 PC의 AirDesk MCP 모드를 켜고 네이티브 MCP 서버도 등록해줘.
+> 클라이언트의 원격 터미널 허용은 변경하지 말아줘.
+
+설치기는 `~/.agents/skills/`에 스킬을 설치하고, 기존 Codex 설정을 유지하면서
+네이티브 MCP 서버를 등록합니다. MCP 활성화는 설치 시 한 번만 수행합니다.
+AirDesk에서 로그인하고 MCP 클라이언트를 다시 로드하세요. 대상 PC에서는
+소유자가 원격 터미널·호스트 접근 권한을 확인하면 됩니다. 대상의 MCP는 필요 없습니다.
+
+### npm / npx 설치
+
+설치기는 Node.js 22 이상이 필요합니다. 패키지는 **npm 배포 준비 상태이며 아직
+게시되지 않았습니다.** 최초 게시 후에는 다음 명령으로 설치할 수 있습니다.
 
 ```sh
-git clone https://github.com/AirDesk-Inc/remote-coumputer-use.git
+npx @airdesk/remote-computer-use install
 ```
 
-macOS Codex에서는 기존 `~/.codex/config.toml` 설정을 유지하면서 다음을 추가합니다.
+현재는 GitHub 저장소를 받은 폴더에서 실행합니다.
 
-```toml
-[mcp_servers.airdesk]
-command = "/Applications/AirDesk.app/Contents/MacOS/AirDesk"
-args = ["--mcp-server"]
-startup_timeout_sec = 20
-tool_timeout_sec = 60
+```sh
+npm ci --ignore-scripts
+node bin/cli.mjs install
 ```
 
-Windows는 실제 설치된 `AirDesk.exe`의 절대 경로를 사용합니다. 버전별 설치 경로는
-업데이트 후 바뀔 수 있습니다. 계정 토큰을 설정 파일에 적거나 MCP를 공개 네트워크에
-노출하지 마세요. 자세한 경로·설치 방법은 [설치 안내](skills/remote-computer-use/references/setup.md)에 있습니다.
+Windows 또는 별도 설치 경로에서는 `--binary`로 신뢰하는 AirDesk 실행 파일의
+절대 경로를 지정합니다. `--dry-run`은 실행·저장 없이 계획만 확인하고,
+`--skip-mcp`는 스킬만 설치합니다. 기존 스킬이나 MCP 설정이 다르면 덮어쓰지 않습니다.
+자동 활성화는 `--mcp-server --mcp-setup`을 지원하는 AirDesk 빌드가 필요합니다.
+구버전은 업데이트하거나 수동 설정을 사용하세요.
+[설치 안내](skills/remote-computer-use/references/setup.md)와
+[npm 배포 준비](docs/npm-release.md)를 참고하세요. 계정 토큰을 설정에 적거나
+MCP를 공개 네트워크에 노출하지 마세요.
 
 사용 예시:
 
 > $remote-computer-use로 허가된 사무실 PC의 화면을 확인해줘.
-> 양쪽 모두 AirDesk가 설치되어 있고 MCP 모드와 원격 터미널이 켜져 있어.
+> 양쪽 모두 AirDesk가 설치되어 있고 클라이언트 MCP가 켜져 있어.
+> 대상 PC의 원격 터미널이 꺼져 있으면 켜 달라고 알려줘.
 > 접근 권한도 승인했어. 이름이 중복되면 대상 PC를 먼저 물어봐.
 
 실제 확인한 조건만 전달하세요. MCP 활성화는 모든 명령의 실행 동의가 아니며,
@@ -77,10 +90,10 @@ Windows나 별도 설치 경로에서는 `--binary`로 신뢰할 수 있는 AirD
 `remote_status` 확인만 수행합니다. 원격 연결·화면 캡처·입력·명령 실행·설정 변경은
 하지 않습니다. `config`도 설정 내용을 출력할 뿐 파일을 수정하지 않습니다.
 
-**로컬 진단 성공이 대상 PC의 MCP 상태 확인을 의미하지는 않습니다.**
-`remote_status`의 MCP 설정값은 제어 PC 기준입니다. 스킬은 연결 전에 대상 PC
-소유자의 명시적 확인 또는 대상 PC에서 직접 실행한 진단을 별도로 요구합니다.
-이 절차는 스킬의 사용 조건이며, 원격 프로토콜의 강제 인증·증명 기능은 아닙니다.
+**로컬 진단 성공이 대상 PC의 접근 권한 확인을 의미하지는 않습니다.**
+`remote_status`의 MCP 설정값은 제어 PC 기준입니다. 대상의 공유·접근 권한은
+별도로 확인합니다. 대상 원격 터미널이 OFF이면 AI가 켜 달라고 요청하며,
+대상 PC의 MCP 활성화는 요구하지 않습니다.
 
 ## 지원 범위
 
@@ -96,9 +109,17 @@ Windows나 별도 설치 경로에서는 `--binary`로 신뢰할 수 있는 AirD
 실제 지원은 설치된 AirDesk 버전, 대상 플랫폼, 권한과 도구 목록에 따라 다릅니다.
 현재 검증 내용과 실원격 테스트의 한계는 [검증 문서](docs/validation.md)에 구분했습니다.
 
+AI는 네이티브 `terminal_open`·`terminal_write`·`terminal_read`로 대상 PC의
+터미널을 사용합니다. Windows에서는 `remote_list_windows`·`remote_get_window`로
+검증된 창 ID, 제목, 프로세스 ID, 위치·크기 및 상태를 조회합니다.
+임의의 숫자 핸들을 추측하지 않고, 서버가 반환한 창 ID로 조작합니다.
+
 ## 개발과 라이선스
 
 ```sh
+npm ci --ignore-scripts
+npm test
+npm run check:package
 python3 -m unittest discover -s tests -v
 ```
 

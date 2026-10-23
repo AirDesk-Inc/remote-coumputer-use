@@ -21,7 +21,8 @@ REQUIRED_TOOLS = frozenset({
     "remote_mouse_button", "remote_scroll", "remote_key", "remote_type_text",
     "terminal_open", "terminal_write", "terminal_read", "terminal_resize", "terminal_close",
 })
-FLAGS = ("mcpEnabled", "mcpServerEnabled", "remoteTerminalEnabled", "credentialAvailable")
+FLAGS = ("mcpEnabled", "mcpServerEnabled", "credentialAvailable")
+STATUS_FLAGS = FLAGS + ("remoteTerminalEnabled",)
 
 
 class DiagnosticError(Exception):
@@ -194,11 +195,11 @@ def status_payload(result):
             payload = json.loads(texts[0])
         except (ValueError, RecursionError):
             raise DiagnosticError("invalid_status_payload") from None
-    if not isinstance(payload, dict) or any(type(payload.get(flag)) is not bool for flag in FLAGS):
+    if not isinstance(payload, dict) or any(type(payload.get(flag)) is not bool for flag in STATUS_FLAGS):
         raise DiagnosticError("missing_or_invalid_status_flags")
     if "error" in payload:
         raise DiagnosticError("status_tool_error")
-    return {flag: payload[flag] for flag in FLAGS}
+    return {flag: payload[flag] for flag in STATUS_FLAGS}
 
 
 def diagnose(command, timeout=5):
@@ -240,7 +241,7 @@ def diagnose(command, timeout=5):
                       "error": "required_tools_missing", "missingTools": missing}
         else:
             flags = status_payload(probe.send("tools/call", {"name": "remote_status", "arguments": {}}))
-            report = {"localPrerequisitesReady": all(flags.values()), "targetVerified": False,
+            report = {"localPrerequisitesReady": all(flags[flag] for flag in FLAGS), "targetVerified": False,
                       "checks": flags, "toolCount": len(names)}
     finally:
         returncode = probe.close()

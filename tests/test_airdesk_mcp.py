@@ -49,6 +49,12 @@ class ProtocolTests(unittest.TestCase):
     def test_compatible_text_fallback(self):
         self.assertTrue(app.diagnose(command("text_only"), 2)["localPrerequisitesReady"])
 
+    def test_local_terminal_hosting_is_not_required(self):
+        result = app.diagnose(command("off:remoteTerminalEnabled"), 2)
+        self.assertTrue(result["localPrerequisitesReady"])
+        self.assertFalse(result["checks"]["remoteTerminalEnabled"])
+        self.assertFalse(result["targetVerified"])
+
     def test_notifications_do_not_replace_responses(self):
         self.assertTrue(app.diagnose(command("notification"), 2)["localPrerequisitesReady"])
 
@@ -113,7 +119,7 @@ class ProtocolTests(unittest.TestCase):
         output = io.StringIO()
         diagnose = app.diagnose
         with mock.patch.object(app, "find_binary", return_value=Path("AirDesk")), \
-                mock.patch.object(app, "diagnose", side_effect=lambda *args: diagnose(command("rpc_error"), 2)), \
+                mock.patch.object(app, "diagnose", side_effect=lambda *args: diagnose(command("rpc_error"), 10)), \
                 contextlib.redirect_stdout(output):
             code = app.main(["doctor"])
         self.assertEqual(code, 2)

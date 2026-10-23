@@ -6,14 +6,23 @@ This project contains an Agent Skill, documentation, and a local setup helper.
 It does not implement AirDesk's network transport, authentication, host service,
 or native MCP server. Use supported AirDesk builds from the official publisher.
 
-Both computers must have AirDesk installed, MCP mode ON, and Remote Terminal ON.
-Host approval and user authorization are separate requirements. Local status
-cannot attest the target's MCP setting; the skill therefore requires separate
-target-owner confirmation or a check performed locally on the target. Skill
+Both computers must have AirDesk installed; MCP mode is needed on the controller
+only. Target Remote Terminal must be ON for terminals/Windows automation;
+controller terminal hosting and target MCP can remain OFF. When target Remote
+Terminal is OFF, ask the owner to enable it; never silently change host permissions.
+Host approval and user authorization are separate requirements. Local MCP status
+does not prove target access approval. Skill
 instructions are not a security boundary against an arbitrary MCP client.
 
 ## Safe Use
 
+- An explicit integration installation request permits the npm installer to copy
+  the skill, add a non-conflicting Codex MCP entry, and enable controller MCP
+  through AirDesk's native one-shot setup. It never enables local terminal
+  hosting or changes target permissions. `--dry-run` performs no native calls or
+  writes; `--skip-mcp` only installs the skill.
+- Never put a setup/enable flag in the recurring MCP startup command. Turning
+  MCP OFF must remain effective when the client restarts its server.
 - Keep the native server on local stdio. Do not publish it as an unauthenticated
   HTTP endpoint or tunnel it into a public listener.
 - Keep client tool approvals enabled. MCP ON is not approval for every remote

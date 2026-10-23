@@ -1,7 +1,9 @@
 # Windows Desktop Automation
 
 These optional tools require a compatible **Windows target** and approved remote
-terminal access, in addition to AirDesk installed and MCP ON at both ends.
+terminal access, in addition to AirDesk on both computers and MCP ON on the
+controller only. Target MCP mode is not required. If target Remote Terminal is
+OFF, ask the user to enable it and wait for confirmation before retrying.
 Discovery of a tool on the controller alone does not prove target support.
 Do not advertise these as macOS accessibility APIs.
 
@@ -20,6 +22,8 @@ Do not advertise these as macOS accessibility APIs.
 All require the task's `sessionId`. Use the exact current schemas for optional
 parameters and action enums. IDs are opaque: never build a window ID from a title,
 guess an element index, or reuse stale IDs after a disconnect/helper restart.
+Window IDs represent host-validated native windows; returned metadata includes
+titles, process IDs, bounds and state. Do not construct or pass guessed HWNDs.
 
 Prefer supported semantic actions (`invoke`, `select`, `toggle`, etc.) over
 coordinate input. For `remote_window_input`, use its window-relative coordinate

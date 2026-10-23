@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/remote-computer-use.png" alt="AirDesk Remote Computer Use. Both controller and target require AirDesk installed, MCP mode ON, and Remote Terminal ON." width="1200">
+  <img src="docs/assets/remote-computer-use.png" alt="AirDesk on both computers. MCP ON on the controller only; Remote Terminal ON on the target." width="1200">
 </p>
 
 # AirDesk Remote Computer Use
@@ -10,8 +10,11 @@ An open-source **Agent Skill** for operating authorized remote computers through
 AirDesk's native MCP server: screenshots, mouse and keyboard input, remote
 terminals, and supported Windows desktop automation.
 
-> **AirDesk must be installed and MCP mode must be ON on BOTH computers.**
-> Enable Remote Terminal on both ends too. The target must be running, shared,
+> **Install AirDesk on both computers. MCP mode is required only on the controller.**
+> The controller needs MCP mode only, not local terminal hosting. Enable Remote
+> Terminal on the target for terminals and Windows automation; target MCP can stay OFF.
+> If target Remote Terminal is OFF, the AI asks you to enable it before proceeding.
+> The target must be running, shared,
 > and approved for the intended user. Without these prerequisites, do not use
 > the skill. This repository is not a standalone remote access application.
 
@@ -21,45 +24,56 @@ terminals, and supported Windows desktop automation.
   consent, coordinate mapping, verification, and cleanup instructions.
 - A dependency-free Python setup helper that prints MCP configuration or checks
   **local** prerequisites without connecting to a target.
+- An npm installer that installs the skill, registers the native MCP server,
+  and enables only the controller's MCP mode through AirDesk itself.
 - English/Korean documentation, security guidance, regression tests, and CI.
 - Existing AirDesk identity assets and a Figma-authored repository cover.
 
-The AirDesk desktop application, backend, native MCP server implementation,
-drivers, account credentials, and proprietary source are **not** included.
-
 ## Quick Start
 
-1. Install a compatible [AirDesk desktop app](https://airdesk.co.kr) on the
-   controller and target. Enable **Remote Terminal** and **MCP mode** on both.
-   Sign in on the controller and approve hosting/access on the target.
-2. Clone this repository and install `skills/remote-computer-use` into your
-   client's skill directory. For Codex, use `~/.agents/skills/`.
-3. Register the **installed AirDesk executable** as a local stdio MCP server.
+Install [AirDesk](https://airdesk.co.kr) on both computers, then ask your AI agent
+to install this GitHub repository:
+
+> Install https://github.com/AirDesk-Inc/remote-coumputer-use.git.
+> Enable this computer's AirDesk MCP mode and register its native MCP server.
+> Leave this computer's Remote Terminal hosting setting unchanged.
+
+The installer copies the skill to `~/.agents/skills/` and adds an `airdesk` server
+to Codex configuration, preserving unrelated settings. It enables MCP once during
+installation, not on every server startup. Sign in through AirDesk and reload
+your MCP client. The target owner enables host access and Remote Terminal for
+terminal/window tools; no target MCP activation is needed.
+
+### npm / npx
+
+Node.js 22+ is required for the installer. The package is **prepared for npm
+publication, not yet published**. After its first publication:
 
 ```sh
-git clone https://github.com/AirDesk-Inc/remote-coumputer-use.git
+npx @airdesk/remote-computer-use install
 ```
 
-For Codex on macOS, merge this into `~/.codex/config.toml`:
+Until then, from a checkout of the repository:
 
-```toml
-[mcp_servers.airdesk]
-command = "/Applications/AirDesk.app/Contents/MacOS/AirDesk"
-args = ["--mcp-server"]
-startup_timeout_sec = 20
-tool_timeout_sec = 60
+```sh
+npm ci --ignore-scripts
+node bin/cli.mjs install
 ```
 
-Windows uses the actual installed `AirDesk.exe` path, which may change with app
-updates. See [full setup](skills/remote-computer-use/references/setup.md) for
-Windows, skill installation, other local MCP clients, and troubleshooting.
-Never add account tokens to this configuration or expose the server publicly.
+Use `--binary` with the trusted AirDesk executable's absolute path on Windows or
+nonstandard installs. `--dry-run` previews without executing AirDesk or writing
+files; `--skip-mcp` installs only the skill. Conflicting skills/configuration are
+not overwritten. Automatic setup requires an AirDesk build supporting
+`--mcp-server --mcp-setup`; older builds must be updated or configured manually.
+See [full setup](skills/remote-computer-use/references/setup.md) and
+[npm release preparation](docs/npm-release.md). Never add account tokens to MCP
+configuration or expose the server publicly.
 
 Ask your agent, for example:
 
 > Use $remote-computer-use to inspect the display on my authorized office PC.
-> AirDesk is installed, MCP mode and Remote Terminal are ON on both computers,
-> and I have approved access. Ask me to select the target if names are ambiguous.
+> Both computers have AirDesk; controller MCP is ON and the target has Remote Terminal
+> enabled and I have approved access. Ask me to select ambiguous targets.
 
 That example describes required confirmation; do not assert it unless it is true.
 Keep your client's tool approval controls enabled.
@@ -77,10 +91,10 @@ On Windows/nonstandard installs, pass `--binary` with the trusted executable's
 absolute path. The helper never installs apps, enables settings, modifies client
 configuration, or performs a remote action.
 
-**A successful local check does not verify the target.** `remote_status` reports
-the controller's MCP settings. The skill separately requires confirmation from
-the target owner or a check run locally on the target before connecting. This
-instruction-level gate is not a cryptographic or host-enforced attestation.
+**A successful local check does not verify target access.** `remote_status`
+reports the controller's MCP settings, not target permission approval. Verify
+host sharing/access separately. If Remote Terminal is OFF on the target, the
+agent asks you to turn it ON; it never asks for target MCP mode.
 
 ## Capabilities and Boundaries
 
@@ -97,9 +111,17 @@ Actual availability depends on the installed AirDesk build, target platform,
 permissions, and negotiated tools. Publication of this skill does not certify
 every app build or end-to-end remote workflow. See [validation](docs/validation.md).
 
+The AI calls AirDesk's native `terminal_open`, `terminal_write`, and
+`terminal_read` tools for a target-side terminal. On Windows, native
+`remote_list_windows` / `remote_get_window` return validated window IDs, titles,
+process IDs, bounds, and state. Use those IDs, not guessed numeric window handles.
+
 ## Development
 
 ```sh
+npm ci --ignore-scripts
+npm test
+npm run check:package
 python3 -m unittest discover -s tests -v
 python3 -m compileall -q skills/remote-computer-use/scripts tests
 ```

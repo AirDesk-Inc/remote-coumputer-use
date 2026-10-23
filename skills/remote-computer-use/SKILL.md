@@ -1,6 +1,6 @@
 ---
 name: remote-computer-use
-description: Operate an authorized remote computer through the native AirDesk MCP server, using screenshots, mouse and keyboard input, remote terminals, and supported Windows desktop automation. Use when the user explicitly asks to control a remote computer with AirDesk. Requires AirDesk installed and MCP mode ON on BOTH the controller and the target; Remote Terminal must also be enabled and host access approved. Not a standalone remote access server.
+description: Install the AirDesk remote-computer-use integration when explicitly requested, or operate an authorized remote computer through AirDesk's native MCP server using screenshots, input, terminals, and Windows desktop automation. Requires AirDesk on both computers and MCP mode ON only on the controller. Ask the user to enable Remote Terminal on the target when it is OFF; target MCP mode is not required. Requires approved host access.
 license: MIT for original skill content and scripts; AirDesk logos and trademarks excluded (see assets/NOTICE.md).
 metadata:
   author: AirDesk-Inc
@@ -12,36 +12,50 @@ metadata:
 Requires a local stdio-capable MCP client and a compatible AirDesk desktop app.
 Python 3.10+ is optional for diagnostics, not required for the native MCP server.
 
-## Mandatory Gate: Both Computers
+## Mandatory Gate
 
 Do not use this skill to connect, capture a screen, send input, or open a terminal
 until ALL of these requirements are satisfied:
 
-1. **Controller:** AirDesk is installed, the user is signed in, **MCP mode is ON**,
-   and **Remote Terminal is ON** in the AirDesk app.
-2. **Target:** AirDesk is installed and running, **MCP mode is ON**, and
-   **Remote Terminal is ON**. The owner has enabled hosting/sharing and approved
-   this user's access, including terminal access where required.
+1. **Controller:** AirDesk is installed, the user is signed in, and **MCP mode is
+   ON**. Local Remote Terminal hosting may remain OFF.
+2. **Target:** AirDesk is installed and running. The owner has enabled
+   hosting/sharing and approved this user's access. **Target MCP mode is not
+   required.** Terminal and Windows automation additionally require the target's
+   **Remote Terminal** permission.
 3. The user has authorized the specific target and task. An enabled MCP mode is
    not blanket approval to execute commands or access every computer.
 
 Use `remote_status` for the controller preflight. Require the actual booleans
-`mcpEnabled`, `mcpServerEnabled`, `remoteTerminalEnabled`, and
+`mcpEnabled`, `mcpServerEnabled`, and
 `credentialAvailable` to be true. Missing fields mean unverified, not enabled.
+`remoteTerminalEnabled` describes local hosting and is informational, not a
+controller prerequisite.
 
-**Those flags describe the controller only.** A listed/online computer,
-`terminalAdvertised`, `terminalSupported`, or a successful connection does NOT
-prove that the target's MCP mode is ON. Obtain explicit confirmation from the
-target owner for this session, or a local diagnostic run on the target. If target
-setup is unknown, ask and stop before connecting. Reconfirm after a target or
-settings change. This is a skill usage gate, not a claim of protocol attestation.
+**Those flags describe the controller only.** Verify target installation, host
+availability and authorized access separately. If target access is unknown,
+ask and stop before connecting. Do not ask the target owner to enable MCP mode.
 
-If either side lacks AirDesk or has MCP mode OFF, provide the
-[setup steps](references/setup.md) and stop. Never install software, turn on
-settings, modify auth/config files, inject credentials, or use SSH/local shell/
-another remote transport to bypass this requirement. Local shell use is limited
-to user-approved installation/configuration of this skill or its read-only
-diagnostic, not remote task execution.
+If the controller's MCP is ON but target Remote Terminal is OFF, ask:
+**"Please turn on Remote Terminal in the target computer's AirDesk hosting
+settings, then let me know. Target MCP mode does not need to be enabled."**
+Do not silently toggle target permissions or repeatedly retry terminal/window
+tools. `terminalAdvertised: false` or `terminalSupported: false` may also mean an
+unsupported/older host, not necessarily OFF. Explain that distinction and request
+a compatible host update if needed. After confirmation, reconnect if necessary
+and verify support/host approval before retrying. Screen-only work can continue
+with its own approved screen/input permissions; never substitute a shell bypass.
+
+If either side lacks AirDesk or the controller has MCP mode OFF, provide the
+[setup steps](references/setup.md) and stop remote actions. An explicit request
+to install this integration permits its installer to register native MCP and
+enable the controller's MCP mode through AirDesk's one-shot setup command.
+Do not edit AirDesk settings/auth files directly, enable local terminal hosting
+as a shortcut, or change target settings without separate approval. Do not
+automatically re-enable MCP after the user turns it OFF during a remote task.
+Never inject credentials or use SSH/local shell/another remote transport to
+bypass this gate. Local shell use is limited to authorized integration setup
+and diagnostics, not execution of remote tasks.
 
 ## Discover and Connect
 

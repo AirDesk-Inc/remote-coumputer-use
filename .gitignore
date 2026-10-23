@@ -20,3 +20,6 @@ captures/
 private/
 dist/
 build/
+node_modules/
+*.tgz
+npm-debug.log*

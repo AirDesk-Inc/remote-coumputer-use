@@ -1,0 +1,29 @@
+{
+  "name": "@airdesk/remote-computer-use",
+  "version": "0.1.0",
+  "description": "Install the AirDesk remote computer use skill and configure its native MCP server.",
+  "type": "module",
+  "bin": { "airdesk-remote-computer-use": "bin/cli.mjs" },
+  "engines": { "node": ">=22" },
+  "license": "MIT",
+  "author": "AirDesk-Inc",
+  "repository": { "type": "git", "url": "git+https://github.com/AirDesk-Inc/remote-coumputer-use.git" },
+  "homepage": "https://github.com/AirDesk-Inc/remote-coumputer-use#readme",
+  "bugs": { "url": "https://github.com/AirDesk-Inc/remote-coumputer-use/issues" },
+  "keywords": ["airdesk", "mcp", "agent-skills", "remote-desktop", "computer-use"],
+  "publishConfig": { "access": "public", "registry": "https://registry.npmjs.org/" },
+  "files": [
+    "bin/*.mjs", "lib/*.mjs", "README.ko.md", "SECURITY.md", "TRADEMARKS.md", "CONTRIBUTING.md",
+    "docs/*.md", "docs/assets/*.png",
+    "skills/remote-computer-use/SKILL.md", "skills/remote-computer-use/LICENSE.txt",
+    "skills/remote-computer-use/agents/*.yaml", "skills/remote-computer-use/assets/*.md",
+    "skills/remote-computer-use/assets/*.svg", "skills/remote-computer-use/references/*.md",
+    "skills/remote-computer-use/scripts/*.py"
+  ],
+  "scripts": {
+    "test": "node --test tests/installer.test.mjs",
+    "check:package": "node scripts/check-package.mjs",
+    "prepublishOnly": "npm run check:package"
+  },
+  "dependencies": { "smol-toml": "1.9.1" }
+}

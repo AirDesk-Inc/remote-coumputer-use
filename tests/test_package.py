@@ -14,6 +14,8 @@ SKILL = ROOT / "skills/remote-computer-use"
 class PackageTests(unittest.TestCase):
     def test_local_markdown_links_resolve(self):
         for document in ROOT.rglob("*.md"):
+            if "node_modules" in document.relative_to(ROOT).parts:
+                continue
             text = document.read_text(encoding="utf-8")
             for target in re.findall(r"\[[^\]]*\]\(([^)]+)\)", text):
                 parsed = urlsplit(target)
@@ -31,9 +33,11 @@ class PackageTests(unittest.TestCase):
         self.assertTrue((SKILL / "assets/NOTICE.md").is_file())
         text = (SKILL / "SKILL.md").read_text(encoding="utf-8")
         self.assertTrue(text.startswith("---\nname: remote-computer-use\n"))
-        self.assertIn("MCP mode is ON", text)
+        self.assertIn("MCP mode is ON", " ".join(text.split()))
         self.assertIn("Those flags describe the controller only.", text)
         self.assertIn("ask and stop before connecting", text)
+        self.assertIn("Target MCP mode is not required.", " ".join(text.split()))
+        self.assertIn("Please turn on Remote Terminal", text)
 
     def test_svg_assets_are_self_contained(self):
         for asset in (SKILL / "assets").glob("*.svg"):
