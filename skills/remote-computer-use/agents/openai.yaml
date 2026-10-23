@@ -1,0 +1,7 @@
+interface:
+  display_name: "AirDesk Remote Computer Use"
+  short_description: "Control authorized computers through AirDesk MCP"
+  icon_small: "./assets/airdesk-symbol.svg"
+  icon_large: "./assets/airdesk-lockup.svg"
+  brand_color: "#176BFF"
+  default_prompt: "Use $remote-computer-use to help with my authorized remote computer task. First verify AirDesk is installed and MCP mode is ON on both computers."
