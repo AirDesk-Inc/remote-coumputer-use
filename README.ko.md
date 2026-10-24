@@ -42,14 +42,13 @@ AirDesk에서 로그인하고 MCP 클라이언트를 다시 로드하세요. 대
 
 ### npm / npx 설치
 
-설치기는 Node.js 22 이상이 필요합니다. 패키지는 **npm 배포 준비 상태이며 아직
-게시되지 않았습니다.** 최초 게시 후에는 다음 명령으로 설치할 수 있습니다.
+설치기는 Node.js 22 이상이 필요합니다. 다음 명령으로 설치할 수 있습니다.
 
 ```sh
 npx @airdesk/remote-computer-use install
 ```
 
-현재는 GitHub 저장소를 받은 폴더에서 실행합니다.
+또는 GitHub 저장소를 받은 폴더에서 실행합니다.
 
 ```sh
 npm ci --ignore-scripts
@@ -62,7 +61,7 @@ Windows 또는 별도 설치 경로에서는 `--binary`로 신뢰하는 AirDesk 
 자동 활성화는 `--mcp-server --mcp-setup`을 지원하는 AirDesk 빌드가 필요합니다.
 구버전은 업데이트하거나 수동 설정을 사용하세요.
 [설치 안내](skills/remote-computer-use/references/setup.md)와
-[npm 배포 준비](docs/npm-release.md)를 참고하세요. 계정 토큰을 설정에 적거나
+[npm 배포 안내](docs/npm-release.md)를 참고하세요. 계정 토큰을 설정에 적거나
 MCP를 공개 네트워크에 노출하지 마세요.
 
 사용 예시:

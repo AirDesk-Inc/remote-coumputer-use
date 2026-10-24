@@ -40,14 +40,14 @@ npm ci --ignore-scripts
 node bin/cli.mjs install
 ```
 
-After the package's first npm publication, the equivalent is:
+The equivalent npm command is:
 
 ```sh
 npx @airdesk/remote-computer-use install
 ```
 
-The npm package is currently prepared, not published. The default installation
-copies the skill into `~/.agents/skills/remote-computer-use`, preserves other
+The default installation copies the skill into
+`~/.agents/skills/remote-computer-use`, preserves other
 Codex configuration, and registers the installed AirDesk executable. The config
 defaults to `$CODEX_HOME/config.toml` or `~/.codex/config.toml`.
 

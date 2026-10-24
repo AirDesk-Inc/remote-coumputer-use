@@ -46,14 +46,13 @@ terminal/window tools; no target MCP activation is needed.
 
 ### npm / npx
 
-Node.js 22+ is required for the installer. The package is **prepared for npm
-publication, not yet published**. After its first publication:
+Node.js 22+ is required for the installer:
 
 ```sh
 npx @airdesk/remote-computer-use install
 ```
 
-Until then, from a checkout of the repository:
+Alternatively, from a checkout of the repository:
 
 ```sh
 npm ci --ignore-scripts
@@ -66,7 +65,7 @@ files; `--skip-mcp` installs only the skill. Conflicting skills/configuration ar
 not overwritten. Automatic setup requires an AirDesk build supporting
 `--mcp-server --mcp-setup`; older builds must be updated or configured manually.
 See [full setup](skills/remote-computer-use/references/setup.md) and
-[npm release preparation](docs/npm-release.md). Never add account tokens to MCP
+[npm release guide](docs/npm-release.md). Never add account tokens to MCP
 configuration or expose the server publicly.
 
 Ask your agent, for example:

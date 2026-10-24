@@ -1,8 +1,8 @@
-# npm Release Preparation
+# npm Release Guide
 
 Package: `@airdesk/remote-computer-use`, version `0.1.0`, public access.
-The package is prepared but **not published**. Scope ownership and permission to
-publish to `@airdesk` must be verified by the maintainer before a real release.
+Scope ownership and permission to publish to `@airdesk` must be verified by the
+maintainer before a release. Use a new version for each subsequent publication.
 
 ## Release Gates
 
@@ -49,5 +49,6 @@ After publication, verify the registry version, tarball contents and command:
 npx @airdesk/remote-computer-use install --dry-run
 ```
 
-Then update both READMEs to remove the unpublished warning. Keep user MCP OFF
-effective: never add `--enable-mcp` to the recurring native server command.
+Keep both READMEs and the bundled setup guide current with the published package.
+Keep user MCP OFF effective: never add `--enable-mcp` to the recurring native
+server command.
