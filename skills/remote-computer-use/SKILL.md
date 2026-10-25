@@ -4,7 +4,7 @@ description: Install the AirDesk remote-computer-use integration when explicitly
 license: MIT for original skill content and scripts; AirDesk logos and trademarks excluded (see assets/NOTICE.md).
 metadata:
   author: AirDesk-Inc
-  version: "0.1.0"
+  version: "0.1.1"
 ---
 
 # AirDesk Remote Computer Use

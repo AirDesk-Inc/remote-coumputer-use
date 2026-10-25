@@ -1,6 +1,6 @@
 # npm Release Guide
 
-Package: `@airdesk/remote-computer-use`, version `0.1.0`, public access.
+Package: `@airdesk/remote-computer-use`, version `0.1.1`, public access.
 Scope ownership and permission to publish to `@airdesk` must be verified by the
 maintainer before a release. Use a new version for each subsequent publication.
 

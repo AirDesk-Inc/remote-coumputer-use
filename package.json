@@ -1,6 +1,6 @@
 {
   "name": "@airdesk/remote-computer-use",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Install the AirDesk remote computer use skill and configure its native MCP server.",
   "type": "module",
   "bin": { "airdesk-remote-computer-use": "bin/cli.mjs" },

@@ -4,6 +4,7 @@ import * as fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { parse } from 'smol-toml';
 import { configAddition, findBinary, install, packageRoot, skillFiles } from '../lib/installer.mjs';
 
@@ -32,6 +33,17 @@ test('install copies a complete skill and registers only normal native startup',
   for (const name of skillFiles) {
     assert.deepEqual(await fs.readFile(path.join(result.destination, name)),
       await fs.readFile(path.join(packageRoot, 'skills', 'remote-computer-use', name)));
+  }
+  for (const name of skillFiles.filter(name => name.endsWith('.md'))) {
+    const document = path.join(result.destination, name);
+    for (const [, target] of (await fs.readFile(document, 'utf8')).matchAll(/\[[^\]]*\]\(([^)]+)\)/gu)) {
+      const reference = new URL(target, pathToFileURL(document));
+      if (reference.protocol !== 'file:') continue;
+      const filename = fileURLToPath(reference);
+      const relative = path.relative(result.destination, filename);
+      assert(!relative.startsWith(`..${path.sep}`) && !path.isAbsolute(relative), `Link escapes the installed skill: ${name}`);
+      assert((await fs.stat(filename)).isFile(), `Missing installed reference: ${target}`);
+    }
   }
   const config = parse(await fs.readFile(options.config, 'utf8'));
   assert.deepEqual(config.mcp_servers.airdesk.args, ['--mcp-server']);
@@ -130,13 +142,14 @@ test('binary lookup rejects relative paths and wrong filenames', async () => {
   await assert.rejects(findBinary(undefined, 'win32'), /binary_path_required/u);
 });
 
-test('CLI help/version work without native startup', () => {
+test('CLI help/version work without native startup', async () => {
   const cli = path.join(packageRoot, 'bin', 'cli.mjs');
   const help = spawnSync(process.execPath, [cli, '--help'], { encoding: 'utf8' });
   assert.equal(help.status, 0);
   assert.match(help.stdout, /--skip-mcp/u);
   const version = spawnSync(process.execPath, [cli, '--version'], { encoding: 'utf8' });
-  assert.equal(version.stdout.trim(), '0.1.0');
+  const manifest = JSON.parse(await fs.readFile(path.join(packageRoot, 'package.json'), 'utf8'));
+  assert.equal(version.stdout.trim(), manifest.version);
 });
 
 test('CLI rejects malformed options before installation', () => {

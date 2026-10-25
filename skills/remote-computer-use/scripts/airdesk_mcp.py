@@ -12,7 +12,7 @@ import sys
 import threading
 import time
 
-VERSION = "0.1.0"
+VERSION = "0.1.1"
 PROTOCOL = "2025-11-25"
 MAX_LINE = 1024 * 1024
 REQUIRED_TOOLS = frozenset({
