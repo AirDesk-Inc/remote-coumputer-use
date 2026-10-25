@@ -47,7 +47,22 @@ This proves compatibility of that installed build's local stdio/status contract.
 It does **not** prove end-to-end remote screen, mouse, keyboard, terminal, Windows
 UI Automation, or host permission enforcement. No remote session was opened as
 part of publication. Target MCP is not a prerequisite; approved host access and
-Remote Terminal for terminal/window tools are still required.
+Remote Terminal for shell tools are still required. Desktop/browser automation
+uses approved host access and input permissions, independently of the shell setting.
+
+## Native Enhancements, 2026-10-25
+
+The accompanying native source exposes 32 tools. Its focused tests cover
+screenshot bindings/automatic coordinate mapping, stale display/session/size
+rejection, frame wait timeout, named chords, MCP revocation and terminal ownership.
+A disposable sandboxed headless Chrome profile verifies actual CDP tab discovery,
+navigation, DOM text input/click, password redaction and stale snapshot rejection.
+The Mac native fixture tests worker framing/cancellation and uses a temporary
+owned window to test AX discovery, password redaction and value updates when OS
+Accessibility permission is available; permission-denial coverage is distinct.
+These checks do not certify Windows runtime or installed two-computer acceptance.
+Browser DOM requires an explicitly enabled target loopback debugging browser;
+installing this skill does not enable browser debugging or update the native app.
 
 ## Opt-In Acceptance Checklist
 
@@ -55,8 +70,8 @@ Only perform these with the owner's explicit authorization and both-computer
 setup complete. Use a disposable app/document, not a live production workflow.
 
 - [ ] Verify AirDesk on both PCs, controller MCP ON and local terminal OFF.
-- [ ] Leave target MCP OFF; confirm target Remote Terminal ON for terminal/window tools.
-- [ ] With target Remote Terminal OFF, confirm the agent asks its owner to enable it before retrying those tools.
+- [ ] Leave target MCP OFF; confirm desktop/browser automation with approved input.
+- [ ] With target Remote Terminal OFF, ask its owner to enable it before shell work only.
 - [ ] Authenticate/approve the intended user; select the exact authorized target.
 - [ ] Connect, verify current session/display and a changing screenshot.
 - [ ] Test resized-image-to-source coordinate mapping at center and corners.
@@ -64,7 +79,7 @@ setup complete. Use a disposable app/document, not a live production workflow.
 - [ ] Test click, key, composed text and key/button release in a test document.
 - [ ] Open/read/write/resize/close a terminal and verify a harmless command's
       shell exit status, not merely transport acknowledgment.
-- [ ] On supported Windows targets, discover an app/window and use a fresh UI
+- [ ] On supported Windows/macOS targets, discover an app/window and use a fresh UI
       snapshot; check stale-ID and unsupported-control behavior.
 - [ ] Disable MCP in the controller app and verify controls stop. Check target
       permission revocation separately; do not claim remote attestation.

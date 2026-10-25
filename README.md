@@ -8,12 +8,13 @@
 
 An open-source **Agent Skill** for operating authorized remote computers through
 AirDesk's native MCP server: screenshots, mouse and keyboard input, remote
-terminals, and supported Windows desktop automation.
+terminals, Windows/macOS desktop automation, and Chromium browser DOM control.
 
 > **Install AirDesk on both computers. MCP mode is required only on the controller.**
 > The controller needs MCP mode only, not local terminal hosting. Enable Remote
-> Terminal on the target for terminals and Windows automation; target MCP can stay OFF.
-> If target Remote Terminal is OFF, the AI asks you to enable it before proceeding.
+> Terminal on the target for shell commands only; target MCP can stay OFF.
+> Desktop/browser automation uses approved host access and input permissions.
+> If target Remote Terminal is OFF, the AI asks you to enable it before shell work.
 > The target must be running, shared,
 > and approved for the intended user. Without these prerequisites, do not use
 > the skill. This repository is not a standalone remote access application.
@@ -42,7 +43,7 @@ The installer copies the skill to `~/.agents/skills/` and adds an `airdesk` serv
 to Codex configuration, preserving unrelated settings. It enables MCP once during
 installation, not on every server startup. Sign in through AirDesk and reload
 your MCP client. The target owner enables host access and Remote Terminal for
-terminal/window tools; no target MCP activation is needed.
+shell terminal tools; no target MCP activation is needed for automation.
 
 ### npm / npx
 
@@ -100,11 +101,12 @@ agent asks you to turn it ON; it never asks for target MCP mode.
 | Capability | Contract |
 | --- | --- |
 | Computer discovery / connection | Authenticated AirDesk account and host approval; one host per MCP process. |
-| Screenshots / display selection | Fresh display metadata; native pixel coordinates, not resized image coordinates. |
+| Screenshots / display selection | New-frame wait, frameId and screenshotId-bound automatic PNG-to-native coordinates. |
 | Mouse / keyboard / text | Wait for input readiness; verify the observed result. |
 | Remote terminals | Compatible Windows/macOS targets, approved terminal access; inspect command-level completion. |
-| App / window / element automation | Windows targets only; discovered IDs and fresh UI snapshots. |
-| macOS UI Automation, mobile MCP, standalone Linux hosting | Not claimed or supplied by this project. |
+| App / window / element automation | Windows UIA and macOS Accessibility; discovered IDs and fresh snapshots. macOS requires OS Accessibility permission. |
+| Browser tabs / DOM | Chrome/Edge with explicitly enabled target-side loopback CDP; no arbitrary JavaScript. [Browser guide](skills/remote-computer-use/references/browser-control.md). |
+| Safari/Firefox DOM, mobile MCP, standalone Linux hosting | Not supplied. Use supported screen controls where available. |
 
 Actual availability depends on the installed AirDesk build, target platform,
 permissions, and negotiated tools. Publication of this skill does not certify
@@ -113,7 +115,19 @@ every app build or end-to-end remote workflow. See [validation](docs/validation.
 The AI calls AirDesk's native `terminal_open`, `terminal_write`, and
 `terminal_read` tools for a target-side terminal. On Windows, native
 `remote_list_windows` / `remote_get_window` return validated window IDs, titles,
-process IDs, bounds, and state. Use those IDs, not guessed numeric window handles.
+process IDs, bounds, and state. macOS uses the same tools with AXUIElement-backed
+IDs. Use those IDs, not guessed numeric handles. The native app must include the
+new tools; installing this skill alone cannot upgrade an older host.
+
+### Remote Terminal
+
+Windows and macOS target shells are supported, including Free accounts.
+Use `terminal_open` → `terminal_write` → cursor-based `terminal_read` →
+`terminal_close`; `terminal_resize` changes the PTY geometry. No per-session
+approval is required when target Remote Terminal is ON. If OFF, the agent asks
+you to enable it before shell work. Queued input is not command completion:
+inspect output, exit status and the intended effect. See the
+[terminal workflow and examples](skills/remote-computer-use/references/terminal.md).
 
 ## Development
 

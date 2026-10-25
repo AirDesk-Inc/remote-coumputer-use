@@ -1,15 +1,15 @@
-# Windows Desktop Automation
+# Windows and macOS Desktop Automation
 
-These optional tools require a compatible **Windows target** and approved remote
-terminal access, in addition to AirDesk on both computers and MCP ON on the
-controller only. Target MCP mode is not required. If target Remote Terminal is
-OFF, ask the user to enable it and wait for confirmation before retrying.
+These tools require a compatible Windows/macOS target, approved host access and
+keyboard/mouse permission, AirDesk on both computers and MCP ON on the controller.
+Neither target MCP mode nor Remote Terminal is required for automation. Shell
+access remains separate: if Remote Terminal is OFF, ask before using terminal tools.
+macOS requires OS Accessibility permission for the host app; do not grant it silently.
 Discovery of a tool on the controller alone does not prove target support.
-Do not advertise these as macOS accessibility APIs.
 
 | Tool | Use |
 | --- | --- |
-| `remote_list_apps` | Discover launchable apps and opaque `appId` values; use returned pagination. |
+| `remote_list_apps` | Windows installed apps / macOS running apps and opaque appIds; use pagination. |
 | `remote_launch_app` | Launch a discovered `appId`; not arbitrary paths, URLs or shell commands. |
 | `remote_list_windows` | Discover windows and opaque `windowId` values. |
 | `remote_get_window` | Inspect one discovered `windowId`. |
@@ -24,6 +24,14 @@ parameters and action enums. IDs are opaque: never build a window ID from a titl
 guess an element index, or reuse stale IDs after a disconnect/helper restart.
 Window IDs represent host-validated native windows; returned metadata includes
 titles, process IDs, bounds and state. Do not construct or pass guessed HWNDs.
+
+On macOS the same tools use AXUIElement, not Windows UIA. App launch activates an
+already running discovered app. Supported semantic mutations are `invoke` and
+`focus`, plus writable non-password values. Other actions fail explicitly.
+Window gestures use Quartz logical points relative to the returned window bounds,
+not Retina pixels; display screenshot tools still map their own native-pixel space.
+Never mix these coordinate contracts. macOS snapshots expire after 30 seconds;
+Windows snapshots retain their existing shorter lifetime. Reobserve after mutation.
 
 Prefer supported semantic actions (`invoke`, `select`, `toggle`, etc.) over
 coordinate input. For `remote_window_input`, use its window-relative coordinate

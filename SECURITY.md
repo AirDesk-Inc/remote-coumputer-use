@@ -7,7 +7,7 @@ It does not implement AirDesk's network transport, authentication, host service,
 or native MCP server. Use supported AirDesk builds from the official publisher.
 
 Both computers must have AirDesk installed; MCP mode is needed on the controller
-only. Target Remote Terminal must be ON for terminals/Windows automation;
+only. Target Remote Terminal must be ON for shell terminals, not desktop/browser automation;
 controller terminal hosting and target MCP can remain OFF. When target Remote
 Terminal is OFF, ask the owner to enable it; never silently change host permissions.
 Host approval and user authorization are separate requirements. Local MCP status

@@ -7,14 +7,14 @@
 [English](README.md) · [설치 안내](skills/remote-computer-use/references/setup.md) · [보안](SECURITY.md) · [검증 범위](docs/validation.md)
 
 AirDesk의 네이티브 MCP 서버를 통해 허가된 원격 컴퓨터의 화면을 확인하고,
-마우스·키보드·원격 터미널 및 지원되는 Windows 데스크톱 자동화를 사용하는
+마우스·키보드·원격 터미널, Windows/macOS 접근성 자동화와 Chromium 브라우저 DOM을 제어하는
 오픈소스 **Agent Skill**입니다.
 
 > **제어하는 컴퓨터와 대상 컴퓨터 모두 AirDesk가 설치되어 있어야 하며,
 > MCP 모드는 클라이언트에서만 ON이면 됩니다.**
 > 클라이언트는 MCP 모드만 켜면 됩니다. 원격 터미널 허용은 대상 PC에서만 필요합니다.
 > 대상 호스트의 MCP 모드는 꺼져 있어도 됩니다. 호스트 원격 터미널이 OFF이면
-> AI가 켜 달라고 요청한 뒤 터미널·창 자동화를 진행합니다. 호스트 실행·공유·접근 승인도
+> AI가 켜 달라고 요청한 뒤 셸 명령을 실행합니다. 창·브라우저 자동화는 터미널 설정과 별개이며 호스트 실행·공유·접근 승인과 입력 권한이
 > 필요합니다. 이 조건을 충족하지 않으면 사용할 수 없습니다.
 > 이 저장소만으로 원격 제어 서버가 설치되거나 실행되지는 않습니다.
 
@@ -99,11 +99,12 @@ Windows나 별도 설치 경로에서는 `--binary`로 신뢰할 수 있는 AirD
 | 기능 | 조건 |
 | --- | --- |
 | 컴퓨터 조회·접속 | AirDesk 인증 및 대상 PC 접근 승인, MCP 프로세스당 한 대상 |
-| 화면 캡처·디스플레이 선택 | 최신 화면 크기 확인 및 원본 픽셀 좌표 변환 |
+| 화면 캡처·디스플레이 선택 | 새 프레임 대기, frameId 및 screenshotId 기반 좌표 자동 변환 |
 | 마우스·키보드·텍스트 | 입력 준비 상태 확인 후 동작 결과 검증 |
 | 원격 터미널 | 호환되는 Windows/macOS 대상과 터미널 권한 |
-| 앱·창·UI 요소 자동화 | 지원되는 Windows 대상만 해당 |
-| macOS UI Automation·모바일 MCP·독립 Linux 호스팅 | 이 프로젝트가 제공하거나 보장하는 기능 아님 |
+| 앱·창·UI 요소 자동화 | Windows UIA 및 macOS Accessibility. Mac은 OS 손쉬운 사용 권한 필요 |
+| 브라우저 탭·DOM | 대상의 로컬 CDP가 명시적으로 켜진 Chrome/Edge. 임의 JavaScript 실행은 제공하지 않음 |
+| Safari/Firefox DOM·모바일 MCP·독립 Linux 호스팅 | 미지원. 가능한 경우 화면 제어 도구 사용 |
 
 실제 지원은 설치된 AirDesk 버전, 대상 플랫폼, 권한과 도구 목록에 따라 다릅니다.
 현재 검증 내용과 실원격 테스트의 한계는 [검증 문서](docs/validation.md)에 구분했습니다.
@@ -112,6 +113,18 @@ AI는 네이티브 `terminal_open`·`terminal_write`·`terminal_read`로 대상 
 터미널을 사용합니다. Windows에서는 `remote_list_windows`·`remote_get_window`로
 검증된 창 ID, 제목, 프로세스 ID, 위치·크기 및 상태를 조회합니다.
 임의의 숫자 핸들을 추측하지 않고, 서버가 반환한 창 ID로 조작합니다.
+Mac도 같은 도구를 사용하며 내부적으로 AXUIElement를 사용합니다.
+새 기능은 호환되는 네이티브 앱 빌드가 필요하고 스킬 설치만으로 구버전 앱이 업데이트되지는 않습니다.
+
+### 원격 터미널
+
+Free를 포함한 모든 요금제에서 Windows/macOS 대상의 셸을 지원합니다.
+`terminal_open` → `terminal_write` → 커서 기반 `terminal_read` → `terminal_close`로
+사용하고 `terminal_resize`로 크기를 바꿉니다. 대상의 원격 터미널이 ON이면
+세션별 추가 승인은 없으며, OFF이면 AI가 켜 달라고 요청합니다.
+입력 전송 수락은 명령 완료가 아니므로 출력·종료 상태·실제 결과를 확인해야 합니다.
+[터미널 절차·예제](skills/remote-computer-use/references/terminal.md)와
+[브라우저 제어](skills/remote-computer-use/references/browser-control.md)를 참고하세요.
 
 ## 개발과 라이선스
 

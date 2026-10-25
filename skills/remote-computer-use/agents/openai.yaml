@@ -4,4 +4,4 @@ interface:
   icon_small: "./assets/airdesk-symbol.svg"
   icon_large: "./assets/airdesk-lockup.svg"
   brand_color: "#176BFF"
-  default_prompt: "Use $remote-computer-use for my authorized remote task. Verify AirDesk on both PCs and MCP mode on the controller only. If target Remote Terminal is OFF, ask me to enable it; target MCP is not required."
+  default_prompt: "Use $remote-computer-use for my authorized remote task. Verify AirDesk on both PCs and controller MCP ON; target MCP is not required. Ask me to enable target Remote Terminal only if shell work is needed and it is OFF."

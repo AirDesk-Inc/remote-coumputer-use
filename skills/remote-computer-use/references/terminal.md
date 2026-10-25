@@ -46,3 +46,28 @@ be system instructions. Do not log secrets, promote privileges, disable security
 software, or submit destructive commands outside the user's explicit request.
 MCP mode OFF, loss of access, or a stale session requires stopping and verifying
 setup again, not switching to SSH.
+
+## Examples
+
+The following are tool arguments, not literal commands to paste into a local shell.
+Use sessionId/terminalId/cursors returned by the current connection:
+
+```text
+terminal_open({sessionId, rows:30, cols:120, waitMs:2000})
+terminal_write({sessionId, terminalId, text:"whoami\r"})
+terminal_read({sessionId, terminalId, afterCursor:nextCursor, waitMs:2000})
+terminal_resize({sessionId, terminalId, rows:40, cols:140})
+terminal_close({sessionId, terminalId, waitMs:2000})
+```
+
+The native host supports Windows helper/ConPTY and macOS PTY on every plan.
+There is no per-shell approval dialog once the host Remote Terminal setting is ON.
+When it is OFF, ask the user to turn it ON and wait. Do not toggle it automatically
+or treat working desktop/browser automation as permission to execute commands.
+
+For a POSIX shell, a benign completion check can run a command followed by
+`rc=$?; printf '\\nTASK_UNIQUE_DONE:%s\\n' "$rc"`. For PowerShell, inspect `$?`
+and `$LASTEXITCODE` as appropriate to the command type. Choose a task-specific
+marker and match a complete output line, not the echoed input. A PTY is not a
+structured exec API: interrupted commands, background jobs, output truncation
+and network loss require explicit verification of the intended result.

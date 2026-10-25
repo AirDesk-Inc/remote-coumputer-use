@@ -6,7 +6,7 @@
 | --- | --- | --- |
 | Compatible AirDesk desktop app installed | Required | Required |
 | MCP mode ON in AirDesk | Required | Not required |
-| Remote Terminal ON in AirDesk | Not required | Required |
+| Remote Terminal ON in AirDesk | Not required | Shell work only |
 | Signed-in account / approved access | Sign in | Allow the intended user and required permissions |
 | Host running and sharing enabled | Only if also hosting | Required |
 
@@ -16,7 +16,7 @@ No minimum public app version is asserted here. Tool discovery and the diagnosti
 check compatibility with the installed build.
 
 Enable **MCP mode** on the controller only. The target needs **Remote Terminal**
-enabled for terminal and Windows automation tools. If it is OFF, ask its owner
+enabled only for shell terminal tools, not desktop/browser automation. If it is OFF, ask its owner
 to enable it in AirDesk hosting settings and wait for confirmation. Target MCP
 may stay OFF. The authorized installer can enable controller MCP automatically using
 AirDesk's native setup command, without enabling local terminal hosting.
