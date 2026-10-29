@@ -81,7 +81,10 @@ retains full-PNG coordinates, actual cursor telemetry, bounded key repeat/hold,
 and Windows/macOS window coordinates separately. New tools require the matching
 native app and negotiated target capability. Browser traversal exclusions, tab
 activation, bounded semantic editing and persistent local/remote debug settings
-are explicit. This package change does not install a native app, modify in-app
+are explicit. It also describes visible MCP observation windows by default,
+explicit headless/no-video modes, and window-close session cleanup. Their native
+runtime behavior must be verified separately from documentation/package checks.
+This package change does not install a native app, modify in-app
 consent, configure a real user profile, publish npm or prove two-computer input.
 
 Official 0.1.0/0.1.1 npm archive files were read from the public registry and checked
@@ -99,7 +102,9 @@ setup complete. Use a disposable app/document, not a live production workflow.
 - [ ] Leave target MCP OFF; confirm desktop/browser automation with approved input.
 - [ ] With target Remote Terminal OFF, ask its owner to enable it before shell work only.
 - [ ] Authenticate/approve the intended user; select the exact authorized target.
-- [ ] Connect, verify current session/display and a changing screenshot.
+- [ ] Connect with defaults; verify the controller's visible MCP observation window,
+      separate video/window status, current session/display and a changing screenshot.
+- [ ] Verify explicit headless observation and no-video mode only in an authorized test.
 - [ ] Test resized-image-to-source coordinate mapping at center and corners.
 - [ ] Switch a display, wait for completion, and discard old coordinates.
 - [ ] Test click, key, composed text and key/button release in a test document.
@@ -110,6 +115,8 @@ setup complete. Use a disposable app/document, not a live production workflow.
 - [ ] Disable MCP in the controller app and verify controls stop. Check target
       permission revocation separately; do not claim remote attestation.
 - [ ] Confirm owned terminal/session cleanup, including cancellation/timeouts.
+- [ ] Close the owned MCP observation window and verify session end, held-input
+      release and owned-terminal cleanup without automatic reconnect.
 
 Record app/skill versions, OS, action, expected/observed result and limitations
 without saving credentials, host/session IDs, personal screens, or private logs.

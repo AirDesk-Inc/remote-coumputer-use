@@ -84,14 +84,24 @@ and diagnostics, not execution of remote tasks.
 2. After the gate passes, use `remote_list_computers` to find the authorized
    target. Its optional `remoteId` accepts an exact user-provided nine-digit ID.
    Do not guess IDs or choose among ambiguous computer names.
-3. Call `remote_connect` with the exact discovered `hostId` (or verified remote ID)
-   and `video: true` for screen work. Retain the returned `sessionId`; never invent
-   one. One native MCP process supports one active remote host.
-4. Check `remote_status` and the initial screenshot before input. Wait for a real
-   frame and `inputReady: true`. Identify the selected display and native size.
+3. Call `remote_connect` with the exact discovered `hostId` (or verified remote ID).
+   Current builds default `video` and `showWindow` to true, showing the remote
+   screen in an MCP observation window on the controller. Keep that default;
+   use `showWindow:false` only for explicitly requested headless work.
+   `video:false` disables both video and the window. Check the current schema
+   before sending `showWindow`; older apps may require an update for this mode.
+   Retain the returned `sessionId`; never invent one. One native MCP process
+   supports one active remote host.
+4. Check `remote_status`. For screen work, inspect the initial screenshot before
+   input; wait for a real frame and `inputReady: true`. Identify the selected
+   display and native size. A no-video terminal task follows the terminal checks
+   in its reference instead of requesting screenshots.
 
 If a process is already connected, do not take over or disconnect a session you
 did not create without asking. Do not start overlapping input writers.
+The observation window does not enable physical input forwarding or automatic
+clipboard capture. Audio, microphone, overlay and recording remain off. See the
+[connection modes](references/screen-control.md#session-window) for status and lifecycle.
 
 ## Perform the Task
 
@@ -132,6 +142,9 @@ Stop immediately if consent is revoked, MCP is turned off, or permissions fail.
 Release any keys/buttons held by this task. Close only terminals you opened,
 checking whether closure is acknowledged or pending. Disconnect the session you
 created using `remote_disconnect`. Do not close another user's app/session.
+Closing this task's MCP observation window also ends its MCP session and starts
+owned-terminal/held-input cleanup. Treat a user closing it as a session stop;
+do not silently reconnect or continue using the old session ID.
 
 Report what was actually observed and verified, any incomplete output, and any
 remaining cleanup or blocked steps. Distinguish tool acknowledgment from visible

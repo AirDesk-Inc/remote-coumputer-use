@@ -6,8 +6,8 @@ schemas and returned values override these interface notes.
 | Tool | Purpose / important arguments |
 | --- | --- |
 | `remote_list_computers` | Authorized computers; optional exact nine-digit `remoteId`. |
-| `remote_connect` | Exact `hostId`; `video: true` for screenshots. Retain returned `sessionId`. |
-| `remote_status` | Local prerequisites and current connection state; no arguments. |
+| `remote_connect` | Exact `hostId`; optional `video` and `showWindow` both default true on current builds. Retain returned `sessionId`. |
+| `remote_status` | Local prerequisites and current connection state, including separate `videoEnabled` / `showVideoWindow` flags; no arguments. |
 | `remote_screenshot` | `sessionId`, optional `maxWidth` (64-1920), `maxHeight` (64-1080), `afterFrameId`, `waitMs` (0-10000). |
 | `remote_observe` | Same screenshot options plus optional discovered `windowId`, `maxDepth`, `maxElements`, `includeText`; PNG and accessibility state in one call. |
 | `remote_select_display` | `sessionId`, discovered `displayIndex`. |
@@ -24,6 +24,33 @@ schemas and returned values override these interface notes.
 | `remote_disconnect` | The `sessionId` owned by this task. |
 | `local_debug_mode` | Controller only; omit `enabled` to read. Setting it persists local file logging. No remote session is implied. |
 | `remote_debug_mode` | Selected target `sessionId`; omit `enabled` to read. Setting it persists target file logging and requires task authorization for that change. No target MCP/terminal toggle or log upload. |
+
+## Session Window
+
+Current builds open a visible remote-screen window on the **controller** by
+default. It is the user's observation window for MCP automation; the session
+retains `agentControlMode`. Physical keyboard/mouse forwarding, automatic
+clipboard capture, audio, microphone, overlay and recording remain off. Input
+continues through the authorized MCP tools.
+
+| Connection mode | Arguments | Result |
+| --- | --- | --- |
+| Default observation | Omit `video` / `showWindow`, or set both true | Video and a visible MCP observation window. |
+| Explicit headless observation | `video:true, showWindow:false` | Video and screenshot tools remain available without a window. |
+| No-video session | `video:false` | No video or window, regardless of `showWindow`. |
+
+Prefer the default visible mode. Use headless or no-video mode only when that
+mode is explicitly part of the user's task. `remote_status` reports `videoEnabled`
+and `showVideoWindow` separately; neither replaces inspection of an actual frame.
+Discover the installed server's schema first. If it does not advertise
+`showWindow`, omit that argument and explain that an updated native app is needed
+for the new window mode; do not assume an older build displays a window.
+
+Closing the MCP observation window ends that MCP session and initiates cleanup
+of its owned terminals and held inputs, like disconnecting. Stop using that
+`sessionId` and check whether terminal closure is acknowledged or still pending.
+Do not silently reopen a window the user closed. Headless sessions still require
+explicit `remote_disconnect` cleanup when the task is complete.
 
 ## Coordinate Mapping
 

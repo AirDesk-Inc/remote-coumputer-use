@@ -84,6 +84,15 @@ Ask your agent, for example:
 That example describes required confirmation; do not assert it unless it is true.
 Keep your client's tool approval controls enabled.
 
+Current AirDesk builds show the remote screen in an **MCP observation window on
+the controller by default** (`video:true`, `showWindow:true`). The user can watch
+the agent's work while physical input forwarding, automatic clipboard capture,
+audio, microphone, overlay and recording remain off. Closing the window ends
+that MCP session and initiates terminal/held-input cleanup. Explicit
+`showWindow:false` retains video without a window; `video:false` disables both.
+These options require the matching native schema; installing the skill alone
+does not add them to an old app. See [connection modes](skills/remote-computer-use/references/screen-control.md#session-window).
+
 ## Optional Local Check
 
 Python 3.10+ is only required for this helper, not the native MCP connection:

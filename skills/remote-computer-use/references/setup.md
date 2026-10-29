@@ -30,6 +30,16 @@ app; do not edit settings files to simulate consent. Restart the MCP client/serv
 signing in or updating the app. Do not run the MCP server as root/administrator
 just to avoid an access error.
 
+With a compatible current app, `remote_connect` defaults to video plus a visible
+MCP observation window on the controller. The window lets the user watch AI
+actions; it retains agent-only input behavior with automatic clipboard capture,
+audio, microphone, overlay and recording off. Closing it ends that MCP session
+and initiates owned-terminal/held-input cleanup. Headless observation requires
+explicit `showWindow:false` with video enabled; `video:false` always suppresses
+the window. These are connection options, not installer settings. Discover the
+native schema before using `showWindow`; do not send it to an older server that
+does not advertise it. See [screen connection modes](screen-control.md#session-window).
+
 ## 2. Install the Skill
 
 Ask your AI agent:
