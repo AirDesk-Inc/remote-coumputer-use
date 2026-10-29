@@ -8,6 +8,9 @@ The standard-library test suite uses deterministic local MCP subprocess fixtures
 - Exactly one allowed tool call: `remote_status`; no remote discovery or control.
 - Each required flag OFF, missing/invalid flags, and missing tools.
 - Controller MCP ON with local Remote Terminal OFF remains ready.
+- Current consent is required separately from the saved switch; missing consent
+  status is unverified, not ready. Blocked reasons are allowlisted.
+- Required screenshot-bound pointer schemas and optional controller tool groups.
 - Structured results and the legacy text-JSON fallback.
 - JSON-RPC errors and tool-level errors without raw message disclosure.
 - Invalid JSON/UTF-8, oversized messages, wrong response IDs, EOF, notifications,
@@ -26,7 +29,12 @@ python3 -m unittest discover -s tests -v
 
 The Node installer suite covers safe config merging, repeated installs,
 conflicting existing data, dry-run/skill-only behavior, native compatibility and
-enable failures, path escaping, and CLI validation. Tests use temporary files
+enable failures, known terms errors before writes, bounded partial-install
+recovery, official-release upgrades with backups, Python cache handling,
+concurrent file edits, selected JSON clients, path escaping, and CLI validation.
+Codex TOML remains append-only; JSON merges retain unrelated entries and a prior-file
+backup. Desktop/generic skill import is not asserted by a successful MCP config write.
+Tests use temporary files
 and stub native setup; they do not change real AirDesk settings. The package
 check validates the allowlisted archive contents and size without publishing.
 
@@ -52,7 +60,9 @@ uses approved host access and input permissions, independently of the shell sett
 
 ## Native Enhancements, 2026-10-25
 
-The accompanying native source exposes 32 tools. Its focused tests cover
+At the 2026-10-25 source checkpoint the native registry exposed 32 tools; current
+tool availability must be discovered rather than inferred from that historical
+count. The focused tests at that checkpoint covered
 screenshot bindings/automatic coordinate mapping, stale display/session/size
 rejection, frame wait timeout, named chords, MCP revocation and terminal ownership.
 A disposable sandboxed headless Chrome profile verifies actual CDP tab discovery,
@@ -63,6 +73,22 @@ Accessibility permission is available; permission-denial coverage is distinct.
 These checks do not certify Windows runtime or installed two-computer acceptance.
 Browser DOM requires an explicitly enabled target loopback debugging browser;
 installing this skill does not enable browser debugging or update the native app.
+
+## Source improvements, 2026-10-29
+
+The prepared 0.1.2 skill describes PNG-bound click/drag/scroll, region zoom that
+retains full-PNG coordinates, actual cursor telemetry, bounded key repeat/hold,
+and Windows/macOS window coordinates separately. New tools require the matching
+native app and negotiated target capability. Browser traversal exclusions, tab
+activation, bounded semantic editing and persistent local/remote debug settings
+are explicit. This package change does not install a native app, modify in-app
+consent, configure a real user profile, publish npm or prove two-computer input.
+
+Official 0.1.0/0.1.1 npm archive files were read from the public registry and checked
+against their SHA-512 integrity values to generate the shipped SHA-256 upgrade
+manifests. A known 0.1.0 Git source variant is separately identified. The complete
+previous skill directory is retained during upgrades; customization is rejected
+instead of overwritten.
 
 ## Opt-In Acceptance Checklist
 

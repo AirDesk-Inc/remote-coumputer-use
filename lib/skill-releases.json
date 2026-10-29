@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "releases": [
+    {
+      "version": "0.1.0",
+      "source": "npm",
+      "files": {
+        "SKILL.md": "0f565e9e20991d9a0eed2fb05e7ad8036b899fb4f1f0345897c00808deca8096",
+        "LICENSE.txt": "0374cd3ee0c0c797646f2f2fed51af5be12b332b38218ce84c6384b3e297e2ac",
+        "agents/openai.yaml": "e7c6abc5894fd51dfb501b673185aa2992eece734b3ae642877ad74ad4e9aa7c",
+        "assets/NOTICE.md": "3194beeb43db21eb8fe63f512724015acefc2953e3d3818a69c365df36da6298",
+        "assets/airdesk-symbol.svg": "268ba519d5d247574019366ba3ead4c47bf6806fe532ba60fddaaf730ebfa242",
+        "assets/airdesk-lockup.svg": "2190f912c1e7666cbaa69c824dbf01905c373f3acee564c81ebaf76f378fe66d",
+        "references/setup.md": "1bcee84057cc29d9130dafa9a9ff8fee62bb23d5e3484bcaf6155457e49de956",
+        "references/screen-control.md": "54165ad2bdf3f50ed4f4d03fcc71630cc868c4846e1dd20c6268a491671ec19c",
+        "references/terminal.md": "b3b75f09b5af2c751b6c1a46048f35aee7b02ee9e746893d67de1769671dd046",
+        "references/windows-automation.md": "bb1a312e87e4ec0a193e5935e7663f1b9aaa26d7d03b9dddb5ada6fca4006488",
+        "scripts/airdesk_mcp.py": "fc6920c18426f7bf2e0c96174a6e5e71d37c91a48301c0dcce9b7ac6aa1cc8fe"
+      },
+      "integrity": "sha512-fpX4W2tcQ9RtsXrBm9UNKg9q6vf6Fz2o1JQBrk/EiY0Mn1R+stE2uGgahaRKCvc3GeQ7RoVvBqxu32PMYBpiBw=="
+    },
+    {
+      "version": "0.1.1",
+      "source": "npm",
+      "files": {
+        "SKILL.md": "bc60466ab92849e49ddab0adf87deeb432054a307a800012c2584a733611573e",
+        "LICENSE.txt": "0374cd3ee0c0c797646f2f2fed51af5be12b332b38218ce84c6384b3e297e2ac",
+        "agents/openai.yaml": "98f2e5c16129df33f1a23d1a78d94aa806805ffead22e3eb296acbc59c82df37",
+        "assets/NOTICE.md": "3194beeb43db21eb8fe63f512724015acefc2953e3d3818a69c365df36da6298",
+        "assets/airdesk-symbol.svg": "268ba519d5d247574019366ba3ead4c47bf6806fe532ba60fddaaf730ebfa242",
+        "assets/airdesk-lockup.svg": "2190f912c1e7666cbaa69c824dbf01905c373f3acee564c81ebaf76f378fe66d",
+        "references/setup.md": "36e8e60b205545221fd42e2333f7c3a24efc83a1733fe088bd0a2663b329427e",
+        "references/screen-control.md": "51f55b992acbfba0998b1d830f6d71d93a0c90d4178ff72b194e5e41e06713e6",
+        "references/terminal.md": "0f443d6989d2784fd08876415be6ac8491ec2be88fde33ca5d7a9d3860256802",
+        "references/windows-automation.md": "bbe1f58c513fc38266b21485877cf946340ffbfcb7155ad83a878070a972993c",
+        "references/browser-control.md": "9b368720b60befc195d6a457b012580f4fe8aaa2635bd7e6bcb5c3e863a15723",
+        "scripts/airdesk_mcp.py": "3f73a162143123cba8f18d791897e98fb4ba5fa0f7b18d87f0da2bc95841c840"
+      },
+      "integrity": "sha512-as5LFPrEbAnWloz7VmaH675Z+0OwzTqxpdafTmeypTSHaAbALMAgP+YTQTtGMS5XambNsHt+VW+qRpFkOWKROA=="
+    },
+    {
+      "version": "0.1.0",
+      "source": "git-dc7e940",
+      "files": {
+        "SKILL.md": "8d2a6a9cfd0c23499f9c433de3ac789169c0a413d9fb9b6f0dc55865185c1392",
+        "LICENSE.txt": "0374cd3ee0c0c797646f2f2fed51af5be12b332b38218ce84c6384b3e297e2ac",
+        "agents/openai.yaml": "98f2e5c16129df33f1a23d1a78d94aa806805ffead22e3eb296acbc59c82df37",
+        "assets/NOTICE.md": "3194beeb43db21eb8fe63f512724015acefc2953e3d3818a69c365df36da6298",
+        "assets/airdesk-symbol.svg": "268ba519d5d247574019366ba3ead4c47bf6806fe532ba60fddaaf730ebfa242",
+        "assets/airdesk-lockup.svg": "2190f912c1e7666cbaa69c824dbf01905c373f3acee564c81ebaf76f378fe66d",
+        "references/setup.md": "36e8e60b205545221fd42e2333f7c3a24efc83a1733fe088bd0a2663b329427e",
+        "references/screen-control.md": "51f55b992acbfba0998b1d830f6d71d93a0c90d4178ff72b194e5e41e06713e6",
+        "references/terminal.md": "0f443d6989d2784fd08876415be6ac8491ec2be88fde33ca5d7a9d3860256802",
+        "references/windows-automation.md": "bbe1f58c513fc38266b21485877cf946340ffbfcb7155ad83a878070a972993c",
+        "references/browser-control.md": "9b368720b60befc195d6a457b012580f4fe8aaa2635bd7e6bcb5c3e863a15723",
+        "scripts/airdesk_mcp.py": "fc6920c18426f7bf2e0c96174a6e5e71d37c91a48301c0dcce9b7ac6aa1cc8fe"
+      },
+      "sourceCommit": "dc7e940f5b76922af724456a6aba6c5a1688cb78"
+    }
+  ]
+}

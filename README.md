@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/remote-computer-use.png" alt="AirDesk on both computers. MCP ON on the controller only; Remote Terminal ON on the target." width="1200">
+  <img src="docs/assets/remote-computer-use.svg" alt="AirDesk on both computers. MCP ON on the controller only; target Remote Terminal ON for shell work only." width="1200">
 </p>
 
 # AirDesk Remote Computer Use
@@ -32,17 +32,19 @@ terminals, Windows/macOS desktop automation, and Chromium browser DOM control.
 
 ## Quick Start
 
-Install [AirDesk](https://airdesk.co.kr) on both computers, then ask your AI agent
-to install this GitHub repository:
+Install [AirDesk](https://airdesk.co.kr) on both computers. On the controller,
+sign in and review/accept the AI remote-access terms when enabling MCP in the
+app. Then ask your AI agent to install this GitHub repository:
 
 > Install https://github.com/AirDesk-Inc/remote-coumputer-use.git.
 > Enable this computer's AirDesk MCP mode and register its native MCP server.
 > Leave this computer's Remote Terminal hosting setting unchanged.
 
 The installer copies the skill to `~/.agents/skills/` and adds an `airdesk` server
-to Codex configuration, preserving unrelated settings. It enables MCP once during
-installation, not on every server startup. Sign in through AirDesk and reload
-your MCP client. The target owner enables host access and Remote Terminal for
+to Codex configuration by default, preserving unrelated settings. JSON client
+support is selected explicitly with `--client` and the actual `--config` path.
+It enables MCP once during installation, not on every server startup; terms are
+never accepted automatically. Reload your MCP client. The target owner enables host access and Remote Terminal for
 shell terminal tools; no target MCP activation is needed for automation.
 
 ### npm / npx
@@ -63,8 +65,11 @@ node bin/cli.mjs install
 Use `--binary` with the trusted AirDesk executable's absolute path on Windows or
 nonstandard installs. `--dry-run` previews without executing AirDesk or writing
 files; `--skip-mcp` installs only the skill. Conflicting skills/configuration are
-not overwritten. Automatic setup requires an AirDesk build supporting
-`--mcp-server --mcp-setup`; older builds must be updated or configured manually.
+not overwritten. An unchanged official 0.1.0/0.1.1 skill can be explicitly upgraded
+with `--upgrade`; its full previous directory is retained as a backup. Use
+`--upgrade --skip-mcp` for a skill-only update. Automatic setup requires an AirDesk build supporting
+`--mcp-server --mcp-setup` and current consent metadata. Older builds must be
+updated; manual configuration cannot establish missing consent status.
 See [full setup](skills/remote-computer-use/references/setup.md) and
 [npm release guide](docs/npm-release.md). Never add account tokens to MCP
 configuration or expose the server publicly.
@@ -72,8 +77,9 @@ configuration or expose the server publicly.
 Ask your agent, for example:
 
 > Use $remote-computer-use to inspect the display on my authorized office PC.
-> Both computers have AirDesk; controller MCP is ON and the target has Remote Terminal
-> enabled and I have approved access. Ask me to select ambiguous targets.
+> Both computers have AirDesk; controller MCP is ON with current AI terms accepted,
+> and I have approved target access. Ask me to select ambiguous targets.
+> If shell work is needed and target Remote Terminal is OFF, ask me to enable it and wait for confirmation.
 
 That example describes required confirmation; do not assert it unless it is true.
 Keep your client's tool approval controls enabled.
@@ -94,18 +100,21 @@ configuration, or performs a remote action.
 **A successful local check does not verify target access.** `remote_status`
 reports the controller's MCP settings, not target permission approval. Verify
 host sharing/access separately. If Remote Terminal is OFF on the target, the
-agent asks you to turn it ON; it never asks for target MCP mode.
+agent asks you to turn it ON only for shell work; it never asks for target MCP mode.
+The diagnostic distinguishes missing consent, an OFF switch and an unavailable
+policy. Optional controller tool groups are reported separately from core tools;
+their presence does not verify target compatibility.
 
 ## Capabilities and Boundaries
 
 | Capability | Contract |
 | --- | --- |
 | Computer discovery / connection | Authenticated AirDesk account and host approval; one host per MCP process. |
-| Screenshots / display selection | New-frame wait, frameId and screenshotId-bound automatic PNG-to-native coordinates. |
+| Screenshots / display selection | New-frame wait, frameId and screenshotId-bound automatic PNG-to-native coordinates. Region zoom retains full-image coordinates. |
 | Mouse / keyboard / text | Wait for input readiness; verify the observed result. |
 | Remote terminals | Compatible Windows/macOS targets, approved terminal access; inspect command-level completion. |
 | App / window / element automation | Windows UIA and macOS Accessibility; discovered IDs and fresh snapshots. macOS requires OS Accessibility permission. |
-| Browser tabs / DOM | Chrome/Edge with explicitly enabled target-side loopback CDP; no arbitrary JavaScript. [Browser guide](skills/remote-computer-use/references/browser-control.md). |
+| Browser tabs / DOM | Chrome/Edge with explicitly enabled target-side loopback CDP; bounded tab/element actions, no caller JavaScript. Shadow DOM/iframe contents are reported as unsupported. [Browser guide](skills/remote-computer-use/references/browser-control.md). |
 | Safari/Firefox DOM, mobile MCP, standalone Linux hosting | Not supplied. Use supported screen controls where available. |
 
 Actual availability depends on the installed AirDesk build, target platform,

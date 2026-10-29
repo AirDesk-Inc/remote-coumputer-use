@@ -7,22 +7,34 @@ import math
 import os
 from pathlib import Path
 import queue
+import re
 import subprocess
 import sys
 import threading
 import time
 
-VERSION = "0.1.1"
+VERSION = "0.1.2"
 PROTOCOL = "2025-11-25"
 MAX_LINE = 1024 * 1024
 REQUIRED_TOOLS = frozenset({
     "remote_list_computers", "remote_connect", "remote_status", "remote_disconnect",
     "remote_screenshot", "remote_select_display", "remote_mouse_move",
+    "remote_click", "remote_press_key", "remote_observe",
     "remote_mouse_button", "remote_scroll", "remote_key", "remote_type_text",
     "terminal_open", "terminal_write", "terminal_read", "terminal_resize", "terminal_close",
 })
 FLAGS = ("mcpEnabled", "mcpServerEnabled", "credentialAvailable")
 STATUS_FLAGS = FLAGS + ("remoteTerminalEnabled",)
+OPTIONAL_TOOLS = {
+    "screenGestures": frozenset({"remote_zoom", "remote_drag", "remote_cursor_position"}),
+    "desktopAutomation": frozenset({"remote_list_apps", "remote_launch_app", "remote_list_windows",
+        "remote_get_window", "remote_activate_window", "remote_get_window_state", "remote_set_value",
+        "remote_element_action", "remote_window_input"}),
+    "browserAutomation": frozenset({"remote_browser_list_tabs", "remote_browser_activate_tab",
+        "remote_browser_navigate", "remote_browser_get_state", "remote_browser_element_action"}),
+    "debugLogging": frozenset({"local_debug_mode", "remote_debug_mode"}),
+}
+BLOCKED_REASONS = frozenset({"", "policy_unavailable", "ai_remote_access_terms_required", "mcp_disabled"})
 
 
 class DiagnosticError(Exception):
@@ -76,7 +88,8 @@ class StdioProbe:
         self.overflow = threading.Event()
         env = os.environ.copy()
         # Inspect the installed app's normal profile, never injected test credentials.
-        for key in ("REPC_STATE_DIR", "REPC_MCP_AUTH_TOKEN", "REPC_BACKEND_URL"):
+        for key in ("REPC_STATE_DIR", "REPC_MCP_AUTH_TOKEN", "REPC_BACKEND_URL",
+                    "AIRDESK_STATE_DIR", "AIRDESK_MCP_AUTH_TOKEN", "AIRDESK_BACKEND_URL"):
             env.pop(key, None)
         try:
             self.process = subprocess.Popen(
@@ -199,7 +212,21 @@ def status_payload(result):
         raise DiagnosticError("missing_or_invalid_status_flags")
     if "error" in payload:
         raise DiagnosticError("status_tool_error")
-    return {flag: payload[flag] for flag in STATUS_FLAGS}
+    flags = {flag: payload[flag] for flag in STATUS_FLAGS}
+    version = payload.get("termsVersion")
+    version_valid = isinstance(version, str) and re.fullmatch(r"\d{4}-\d{2}-\d{2}", version)
+    known_terms = type(payload.get("termsAccepted")) is bool and type(payload.get("termsRequired")) is bool and bool(version_valid)
+    flags["termsVerified"] = known_terms
+    if known_terms:
+        flags["termsAccepted"] = payload["termsAccepted"]
+        flags["termsRequired"] = payload["termsRequired"]
+    if type(payload.get("mcpConfigured")) is bool:
+        flags["mcpConfigured"] = payload["mcpConfigured"]
+    if version_valid:
+        flags["termsVersion"] = version
+    reason = payload.get("blockedReason", "")
+    flags["blockedReason"] = reason if isinstance(reason, str) and reason in BLOCKED_REASONS else "policy_unavailable"
+    return flags
 
 
 def diagnose(command, timeout=5):
@@ -216,6 +243,7 @@ def diagnose(command, timeout=5):
             raise DiagnosticError("tools_capability_missing")
         probe.send("notifications/initialized", notification=True)
         names = set()
+        schemas = {}
         cursor = None
         seen_cursors = set()
         for _ in range(8):
@@ -227,6 +255,7 @@ def diagnose(command, timeout=5):
                 if not isinstance(tool, dict) or not isinstance(tool.get("name"), str):
                     raise DiagnosticError("invalid_tool_catalog")
                 names.add(tool["name"])
+                schemas[tool["name"]] = tool.get("inputSchema")
             cursor = catalog.get("nextCursor")
             if cursor is None:
                 break
@@ -236,13 +265,37 @@ def diagnose(command, timeout=5):
         else:
             raise DiagnosticError("too_many_catalog_pages")
         missing = sorted(REQUIRED_TOOLS - names)
+        capabilities = {name: {"toolsAvailable": not bool(group - names), "missingTools": sorted(group - names)}
+                        for name, group in OPTIONAL_TOOLS.items()}
         if missing:
             report = {"localPrerequisitesReady": False, "targetVerified": False,
-                      "error": "required_tools_missing", "missingTools": missing}
+                      "error": "required_tools_missing", "missingTools": missing,
+                      "coreToolsAvailable": False, "controllerCapabilities": capabilities}
         else:
-            flags = status_payload(probe.send("tools/call", {"name": "remote_status", "arguments": {}}))
-            report = {"localPrerequisitesReady": all(flags[flag] for flag in FLAGS), "targetVerified": False,
-                      "checks": flags, "toolCount": len(names)}
+            click = schemas.get("remote_click")
+            required = click.get("required") if isinstance(click, dict) else None
+            bound_click = isinstance(required, list) and "screenshotId" in required
+            if not bound_click:
+                report = {"localPrerequisitesReady": False, "targetVerified": False,
+                          "error": "required_tool_schema_missing", "missingSchemaFeatures": ["remote_click.screenshotId"],
+                          "coreToolsAvailable": True, "controllerCapabilities": capabilities}
+            else:
+                flags = status_payload(probe.send("tools/call", {"name": "remote_status", "arguments": {}}))
+                ready = all(flags[flag] for flag in FLAGS) and flags["termsVerified"] and flags["termsAccepted"] and not flags["termsRequired"] and not flags["blockedReason"]
+                blocked = flags["blockedReason"]
+                if blocked == "policy_unavailable":
+                    pass
+                elif not flags["termsVerified"]:
+                    blocked = "terms_status_unavailable"
+                elif flags["termsRequired"] or not flags["termsAccepted"]:
+                    blocked = "ai_remote_access_terms_required"
+                elif not flags["credentialAvailable"]:
+                    blocked = "login_required"
+                elif not all(flags[flag] for flag in ("mcpEnabled", "mcpServerEnabled")):
+                    blocked = blocked or "mcp_disabled"
+                report = {"localPrerequisitesReady": ready, "targetVerified": False,
+                          "checks": flags, "toolCount": len(names), "coreToolsAvailable": True,
+                          "controllerCapabilities": capabilities, "blockedReason": blocked}
     finally:
         returncode = probe.close()
     if returncode != 0:
@@ -264,7 +317,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
     config = commands.add_parser("config", help="Print configuration; do not modify any files")
-    config.add_argument("--client", choices=("codex", "generic"), default="codex")
+    config.add_argument("--client", choices=("codex", "claude-code", "claude-desktop", "generic"), default="codex")
     doctor = commands.add_parser("doctor", help="Inspect local prerequisites; never connect to a target")
     doctor.add_argument("--timeout", type=seconds, default=5, help="Seconds per response (default: 5)")
     for command in (config, doctor):

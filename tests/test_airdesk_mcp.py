@@ -35,7 +35,9 @@ class ProtocolTests(unittest.TestCase):
         self.assertEqual(messages[-1]["params"], {"name": "remote_status", "arguments": {}})
         self.assertTrue(report["localPrerequisitesReady"])
         self.assertFalse(report["targetVerified"])
-        self.assertEqual(report["toolCount"], 16)
+        self.assertEqual(report["toolCount"], 19)
+        self.assertTrue(report['coreToolsAvailable'])
+        self.assertFalse(report['controllerCapabilities']['screenGestures']['toolsAvailable'])
         self.assertNotIn("PRIVATE_SENTINEL", json.dumps(report))
 
     def test_flags_fail_closed_individually(self):
@@ -59,7 +61,31 @@ class ProtocolTests(unittest.TestCase):
         self.assertTrue(app.diagnose(command("notification"), 2)["localPrerequisitesReady"])
 
     def test_pagination(self):
-        self.assertEqual(app.diagnose(command("pages"), 2)["toolCount"], 16)
+        self.assertEqual(app.diagnose(command("pages"), 2)["toolCount"], 19)
+
+    def test_terms_are_distinct_from_the_mcp_switch(self):
+        result = app.diagnose(command('terms_required'), 2)
+        self.assertFalse(result['localPrerequisitesReady'])
+        self.assertEqual(result['blockedReason'], 'ai_remote_access_terms_required')
+        self.assertTrue(result['checks']['mcpConfigured'])
+        self.assertTrue(result['checks']['termsRequired'])
+        self.assertFalse(result['targetVerified'])
+
+    def test_old_terms_status_is_unverified_not_ready(self):
+        result = app.diagnose(command('old_terms_status'), 2)
+        self.assertFalse(result['localPrerequisitesReady'])
+        self.assertEqual(result['blockedReason'], 'terms_status_unavailable')
+
+    def test_unbound_pointer_schema_is_not_ready(self):
+        result = app.diagnose(command('unbound_click'), 2)
+        self.assertFalse(result['localPrerequisitesReady'])
+        self.assertEqual(result['error'], 'required_tool_schema_missing')
+
+    def test_untrusted_blocked_reason_is_sanitized(self):
+        result = app.diagnose(command('private_blocked_reason'), 2)
+        self.assertFalse(result['localPrerequisitesReady'])
+        self.assertEqual(result['blockedReason'], 'policy_unavailable')
+        self.assertNotIn('PRIVATE_SENTINEL', json.dumps(result))
 
     def test_missing_tool_stops_before_status(self):
         with tempfile.TemporaryDirectory() as directory:

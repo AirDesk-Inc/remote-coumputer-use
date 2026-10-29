@@ -10,7 +10,7 @@ const packed = spawnSync(process.execPath, [process.env.npm_execpath, 'pack', '-
 assert.equal(packed.status, 0, 'npm pack failed');
 const [manifest] = JSON.parse(packed.stdout);
 const files = new Set(manifest.files.map(file => file.path));
-for (const name of ['package.json', 'LICENSE', 'bin/cli.mjs', 'lib/installer.mjs', 'README.md',
+for (const name of ['package.json', 'LICENSE', 'bin/cli.mjs', 'lib/installer.mjs', 'lib/skill-releases.json', 'README.md', 'docs/assets/remote-computer-use.svg',
   'TRADEMARKS.md', ...skillFiles.map(name => `skills/remote-computer-use/${name}`)]) assert(files.has(name), `Missing ${name}`);
 for (const name of files) {
   assert(!/(^|\/)(node_modules|tests|\.git|__pycache__|\.env|\.npmrc|private)(\/|$)/u.test(name), `Unexpected ${name}`);

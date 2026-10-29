@@ -1,6 +1,6 @@
 {
   "name": "@airdesk/remote-computer-use",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Install the AirDesk remote computer use skill and configure its native MCP server.",
   "type": "module",
   "bin": { "airdesk-remote-computer-use": "bin/cli.mjs" },
@@ -13,8 +13,8 @@
   "keywords": ["airdesk", "mcp", "agent-skills", "remote-desktop", "computer-use"],
   "publishConfig": { "access": "public", "registry": "https://registry.npmjs.org/" },
   "files": [
-    "bin/*.mjs", "lib/*.mjs", "README.ko.md", "SECURITY.md", "TRADEMARKS.md", "CONTRIBUTING.md",
-    "docs/*.md", "docs/assets/*.png",
+    "bin/*.mjs", "lib/*.mjs", "lib/*.json", "README.ko.md", "SECURITY.md", "TRADEMARKS.md", "CONTRIBUTING.md",
+    "docs/*.md", "docs/assets/*.svg",
     "skills/remote-computer-use/SKILL.md", "skills/remote-computer-use/LICENSE.txt",
     "skills/remote-computer-use/agents/*.yaml", "skills/remote-computer-use/assets/*.md",
     "skills/remote-computer-use/assets/*.svg", "skills/remote-computer-use/references/*.md",

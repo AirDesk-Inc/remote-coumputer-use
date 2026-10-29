@@ -11,7 +11,7 @@ NAMES = (
     "remote_list_computers remote_connect remote_status remote_disconnect "
     "remote_screenshot remote_select_display remote_mouse_move remote_mouse_button "
     "remote_scroll remote_key remote_type_text terminal_open terminal_write "
-    "terminal_read terminal_resize terminal_close"
+    "terminal_read terminal_resize terminal_close remote_click remote_press_key remote_observe"
 ).split()
 PRIVATE = "PRIVATE_SENTINEL_MUST_NOT_APPEAR"
 
@@ -54,12 +54,15 @@ for line in sys.stdin:
                   "serverInfo": {"name": "test-double", "version": "1"}}
     elif method == "tools/list":
         if MODE == "missing_tool":
-            names = NAMES[:-1]
+            names = [name for name in NAMES if name != 'terminal_close']
         elif MODE == "pages":
             names = NAMES[:8] if not message["params"].get("cursor") else NAMES[8:]
         else:
             names = NAMES
         result = {"tools": [{"name": name, "inputSchema": {"type": "object"}} for name in names]}
+        if MODE != "unbound_click":
+            for tool in result['tools']:
+                if tool['name'] == 'remote_click': tool['inputSchema']['required'] = ['sessionId', 'screenshotId', 'x', 'y']
         if MODE == "pages" and not message["params"].get("cursor"):
             result["nextCursor"] = "page-2"
         if MODE == "cursor_loop":
@@ -70,6 +73,7 @@ for line in sys.stdin:
         assert message["params"] == {"name": "remote_status", "arguments": {}}
         status = {"mcpEnabled": True, "mcpServerEnabled": True,
                   "remoteTerminalEnabled": True, "credentialAvailable": True,
+                  "termsAccepted": True, "termsRequired": False, "termsVersion": "2026-10-28", "blockedReason": "",
                   "sessionId": PRIVATE, "hostId": PRIVATE, "token": PRIVATE}
         if MODE.startswith("off:"):
             status[MODE.split(":", 1)[1]] = False
@@ -77,6 +81,13 @@ for line in sys.stdin:
             status["mcpEnabled"] = "true"
         if MODE == "missing_flag":
             del status["credentialAvailable"]
+        if MODE == "terms_required":
+            status.update(mcpEnabled=False, mcpServerEnabled=False, mcpConfigured=True,
+                          termsAccepted=False, termsRequired=True, blockedReason='ai_remote_access_terms_required')
+        if MODE == "old_terms_status":
+            for key in ('termsAccepted', 'termsRequired', 'termsVersion'): del status[key]
+        if MODE == "private_blocked_reason":
+            status['blockedReason'] = PRIVATE
         result = {"structuredContent": status, "content": [{"type": "text", "text": json.dumps(status)}]}
         if MODE == "text_only":
             del result["structuredContent"]

@@ -61,12 +61,14 @@ terminal_close({sessionId, terminalId, waitMs:2000})
 ```
 
 The native host supports Windows helper/ConPTY and macOS PTY on every plan.
-There is no per-shell approval dialog once the host Remote Terminal setting is ON.
+There is no per-shell approval dialog once the host Remote Terminal setting is ON
+with its current in-app feature terms accepted by the owner.
 When it is OFF, ask the user to turn it ON and wait. Do not toggle it automatically
 or treat working desktop/browser automation as permission to execute commands.
 
 For a POSIX shell, a benign completion check can run a command followed by
-`rc=$?; printf '\\nTASK_UNIQUE_DONE:%s\\n' "$rc"`. For PowerShell, inspect `$?`
+`rc=$?; printf '\nTASK_UNIQUE_DONE:%s\n' "$rc"`. This is the literal shell
+command: its printf format contains one backslash before each `n`. For PowerShell, inspect `$?`
 and `$LASTEXITCODE` as appropriate to the command type. Choose a task-specific
 marker and match a complete output line, not the echoed input. A PTY is not a
 structured exec API: interrupted commands, background jobs, output truncation

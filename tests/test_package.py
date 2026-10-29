@@ -40,7 +40,7 @@ class PackageTests(unittest.TestCase):
         self.assertIn("Please turn on Remote Terminal", text)
 
     def test_svg_assets_are_self_contained(self):
-        for asset in (SKILL / "assets").glob("*.svg"):
+        for asset in [*(SKILL / "assets").glob("*.svg"), *(ROOT / 'docs/assets').glob('*.svg')]:
             tree = ET.parse(asset)
             for node in tree.iter():
                 with self.subTest(asset=asset.name):
@@ -56,6 +56,16 @@ class PackageTests(unittest.TestCase):
         self.assertEqual(image[:8], b"\x89PNG\r\n\x1a\n")
         self.assertEqual(struct.unpack(">II", image[16:24]), (1200, 630))
         self.assertLess(len(image), 1024 * 1024)
+
+    def test_current_cover_uses_conditional_shell_requirement(self):
+        cover = ROOT / 'docs/assets/remote-computer-use.svg'
+        tree = ET.parse(cover)
+        text = ' '.join(tree.getroot().itertext())
+        self.assertIn('Shell only: Remote Terminal ON + in-app consent', text)
+        self.assertIn('Target MCP is not required', text)
+        self.assertEqual(tree.getroot().attrib['viewBox'], '0 0 1200 630')
+        for readme in ['README.md', 'README.ko.md']:
+            self.assertIn('src="docs/assets/remote-computer-use.svg"', (ROOT / readme).read_text())
 
 
 if __name__ == "__main__":
