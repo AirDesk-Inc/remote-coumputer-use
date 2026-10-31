@@ -84,6 +84,14 @@ Ask your agent, for example:
 That example describes required confirmation; do not assert it unless it is true.
 Keep your client's tool approval controls enabled.
 
+You can shorten the skill name to `rcu` or `RCU` in conversation:
+
+> Use rcu with AirDesk to inspect the display on my authorized office PC.
+
+This is a conversational shorthand. Explicit skill invocation remains
+`$remote-computer-use`; package, executable and MCP tool names are unchanged.
+The same setup and approval requirements apply to this shorthand.
+
 Current AirDesk builds show the remote screen in an **MCP observation window on
 the controller by default** (`video:true`, `showWindow:true`). The user can watch
 the agent's work while physical input forwarding, automatic clipboard capture,

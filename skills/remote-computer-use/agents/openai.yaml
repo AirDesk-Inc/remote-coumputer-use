@@ -1,7 +1,7 @@
 interface:
-  display_name: "AirDesk Remote Computer Use"
-  short_description: "Control authorized computers through AirDesk MCP"
+  display_name: "AirDesk Remote Computer Use (RCU)"
+  short_description: "Use AirDesk RCU to control authorized computers via MCP"
   icon_small: "./assets/airdesk-symbol.svg"
   icon_large: "./assets/airdesk-lockup.svg"
   brand_color: "#176BFF"
-  default_prompt: "Use $remote-computer-use for my authorized remote task. Verify AirDesk on both PCs, controller MCP ON with current in-app AI terms accepted, and approved target access. Target MCP is not required. Ask me to enable target Remote Terminal only if shell work is needed and it is OFF, then wait for confirmation."
+  default_prompt: "Use $remote-computer-use (RCU) for my authorized remote task. Verify AirDesk on both PCs, controller MCP ON with current in-app AI terms accepted, and approved target access. Target MCP is not required. Ask me to enable target Remote Terminal only if shell work is needed and it is OFF, then wait for confirmation."

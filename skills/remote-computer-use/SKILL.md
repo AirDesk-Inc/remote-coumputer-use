@@ -1,6 +1,6 @@
 ---
 name: remote-computer-use
-description: Install or explicitly upgrade AirDesk remote-computer-use, or operate an authorized Windows/macOS computer through native MCP screenshots, input, accessibility and Chromium browser tools. Requires AirDesk on both computers, approved host access and controller MCP mode ON with current in-app AI terms accepted. Ask for target Remote Terminal only when shell work is needed. Target MCP mode is not required.
+description: Install or explicitly upgrade AirDesk remote-computer-use, or operate an authorized Windows/macOS computer through native MCP screenshots, input, accessibility and Chromium browser tools. Also use when the user says rcu or RCU for AirDesk remote computer work. Requires AirDesk on both computers, approved host access and controller MCP mode ON with current in-app AI terms accepted. Ask for target Remote Terminal only when shell work is needed. Target MCP mode is not required.
 license: MIT for original skill content and scripts; AirDesk logos and trademarks excluded (see assets/NOTICE.md).
 metadata:
   author: AirDesk-Inc
@@ -11,6 +11,10 @@ metadata:
 
 Requires a local stdio-capable MCP client and a compatible AirDesk desktop app.
 Python 3.10+ is optional for diagnostics, not required for the native MCP server.
+
+In AirDesk remote computer requests, treat `rcu` and `RCU` as conversational shorthand for
+this skill, with the same requirements below. The explicit skill invocation is
+still `$remote-computer-use`; keep the actual MCP tool names unchanged.
 
 ## Mandatory Gate
 
