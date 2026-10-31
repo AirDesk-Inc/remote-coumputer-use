@@ -6,7 +6,7 @@ schemas and returned values override these interface notes.
 | Tool | Purpose / important arguments |
 | --- | --- |
 | `remote_list_computers` | Authorized computers; optional exact nine-digit `remoteId`. |
-| `remote_connect` | Exact `hostId`; optional `video` and `showWindow` both default true on current builds. Retain returned `sessionId`. |
+| `remote_connect` | Exact `hostId`; explicitly use `video:true,showWindow:true` for remote-desktop work (also the default policy). Retain returned `sessionId`. |
 | `remote_status` | Local prerequisites and current connection state, including separate `videoEnabled` / `showVideoWindow` flags; no arguments. |
 | `remote_screenshot` | `sessionId`, optional `maxWidth` (64-1920), `maxHeight` (64-1080), `afterFrameId`, `waitMs` (0-10000). |
 | `remote_observe` | Same screenshot options plus optional discovered `windowId`, `maxDepth`, `maxElements`, `includeText`; PNG and accessibility state in one call. |
@@ -27,26 +27,38 @@ schemas and returned values override these interface notes.
 
 ## Session Window
 
-Current builds open a visible remote-screen window on the **controller** by
-default. It is the user's observation window for MCP automation; the session
-retains `agentControlMode`. Physical keyboard/mouse forwarding, automatic
-clipboard capture, audio, microphone, overlay and recording remain off. Input
-continues through the authorized MCP tools.
+Visible MCP/RCU connections must open a **real interactive remote window** on the
+**controller**, with local mouse/keyboard forwarding and the normal toolbar,
+subject to existing host input permissions. An observation-only window does not
+satisfy this policy. Native MCP/agent ownership (`agentControlMode`), returned
+session IDs and owned-resource cleanup remain in force; this is not a separate
+unowned manual session.
+
+Manual and AI input share the same window. Pause AI input while the user
+interacts; resume only after handback and a fresh screenshot/status check.
+Do not assume the native app automatically arbitrates simultaneous input.
+
+Clipboard is independent and remains disabled for MCP ownership, including
+automatic capture/sync, even with the normal toolbar visible. Window visibility
+does not enable audio; microphone, overlay and recording settings are unchanged.
+Do not promise automatic clipboard or audio.
 
 | Connection mode | Arguments | Result |
 | --- | --- | --- |
-| Default observation | Omit `video` / `showWindow`, or set both true | Video and a visible MCP observation window. |
-| Explicit headless observation | `video:true, showWindow:false` | Video and screenshot tools remain available without a window. |
-| No-video session | `video:false` | No video or window, regardless of `showWindow`. |
+| Default interactive remote desktop | Explicitly set `video:true,showWindow:true` (also the default policy) | Video and a real remote window with local mouse/keyboard and the normal toolbar. |
+| User-requested headless | `video:true,showWindow:false` | Video and screenshot tools remain available without a window. |
+| User-requested no-video | `video:false` | No video or window, regardless of `showWindow`. |
 
-Prefer the default visible mode. Use headless or no-video mode only when that
-mode is explicitly part of the user's task. `remote_status` reports `videoEnabled`
+Use the interactive visible mode for remote-desktop work. Use headless or
+no-video mode only when the user explicitly requests it. `remote_status` reports `videoEnabled`
 and `showVideoWindow` separately; neither replaces inspection of an actual frame.
-Discover the installed server's schema first. If it does not advertise
-`showWindow`, omit that argument and explain that an updated native app is needed
-for the new window mode; do not assume an older build displays a window.
+Neither flag proves local input forwarding or the normal toolbar works.
+Discover the installed server's schema first. If `showWindow` is missing or the
+native build only opens an observation-only window, stop desktop input and
+request a compatible app update. Do not silently omit the option or fall back
+to headless mode; installing a skill does not update the native app.
 
-Closing the MCP observation window ends that MCP session and initiates cleanup
+Closing the real remote window ends its owned MCP session and initiates cleanup
 of its owned terminals and held inputs, like disconnecting. Stop using that
 `sessionId` and check whether terminal closure is acknowledged or still pending.
 Do not silently reopen a window the user closed. Headless sessions still require

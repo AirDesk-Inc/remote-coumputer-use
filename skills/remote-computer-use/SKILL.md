@@ -88,23 +88,38 @@ and diagnostics, not execution of remote tasks.
 2. After the gate passes, use `remote_list_computers` to find the authorized
    target. Its optional `remoteId` accepts an exact user-provided nine-digit ID.
    Do not guess IDs or choose among ambiguous computer names.
-3. Call `remote_connect` with the exact discovered `hostId` (or verified remote ID).
-   Current builds default `video` and `showWindow` to true, showing the remote
-   screen in an MCP observation window on the controller. Keep that default;
-   use `showWindow:false` only for explicitly requested headless work.
-   `video:false` disables both video and the window. Check the current schema
-   before sending `showWindow`; older apps may require an update for this mode.
+3. Call `remote_connect` with the exact discovered `hostId` (or verified remote ID)
+   and explicitly set `video:true,showWindow:true` for remote-desktop work. This
+   is also the default connection policy: open a real interactive remote window
+   on the controller with local mouse/keyboard forwarding and the normal toolbar,
+   subject to existing host input permissions, not an observation-only window.
+   Use `showWindow:false` or `video:false` only when the user explicitly requests
+   headless or no-video work, respectively; `video:false` also disables the window.
+   Check the current schema first. If `showWindow` is missing or the native build
+   only provides an observation-only window, stop desktop input and request a
+   compatible app update; do not silently omit the option or fall back to headless.
    Retain the returned `sessionId`; never invent one. One native MCP process
    supports one active remote host.
 4. Check `remote_status`. For screen work, inspect the initial screenshot before
    input; wait for a real frame and `inputReady: true`. Identify the selected
-   display and native size. A no-video terminal task follows the terminal checks
+   display and require `interactiveWindow: true` and `localInputReady: true`
+   before claiming the user can operate the visible remote window. Missing or
+   false fields are unverified: request a compatible app update or investigate
+   local capture, rather than calling an observation-only window interactive.
+   Check native size. A no-video terminal task follows the terminal checks
    in its reference instead of requesting screenshots.
 
 If a process is already connected, do not take over or disconnect a session you
 did not create without asking. Do not start overlapping input writers.
-The observation window does not enable physical input forwarding or automatic
-clipboard capture. Audio, microphone, overlay and recording remain off. See the
+Manual and AI input share the same remote window. Pause AI input while the user
+interacts; resume only after handback and a fresh observation. Native MCP/agent
+ownership (`agentControlMode`), session IDs and cleanup remain in force.
+If a tool reports that the local user is controlling the window, pause and wait
+for handback. Do not retry in a loop or bypass the input guard with another tool.
+Clipboard is independent and remains disabled for MCP ownership, including
+automatic capture/sync. Opening the window does not enable audio; microphone,
+overlay and recording settings are unchanged. Do not promise automatic clipboard
+or audio. See the
 [connection modes](references/screen-control.md#session-window) for status and lifecycle.
 
 ## Perform the Task
@@ -146,7 +161,7 @@ Stop immediately if consent is revoked, MCP is turned off, or permissions fail.
 Release any keys/buttons held by this task. Close only terminals you opened,
 checking whether closure is acknowledged or pending. Disconnect the session you
 created using `remote_disconnect`. Do not close another user's app/session.
-Closing this task's MCP observation window also ends its MCP session and starts
+Closing this task's real remote window also ends its owned MCP session and starts
 owned-terminal/held-input cleanup. Treat a user closing it as a session stop;
 do not silently reconnect or continue using the old session ID.
 

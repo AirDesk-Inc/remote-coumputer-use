@@ -30,15 +30,26 @@ app; do not edit settings files to simulate consent. Restart the MCP client/serv
 signing in or updating the app. Do not run the MCP server as root/administrator
 just to avoid an access error.
 
-With a compatible current app, `remote_connect` defaults to video plus a visible
-MCP observation window on the controller. The window lets the user watch AI
-actions; it retains agent-only input behavior with automatic clipboard capture,
-audio, microphone, overlay and recording off. Closing it ends that MCP session
-and initiates owned-terminal/held-input cleanup. Headless observation requires
-explicit `showWindow:false` with video enabled; `video:false` always suppresses
-the window. These are connection options, not installer settings. Discover the
-native schema before using `showWindow`; do not send it to an older server that
-does not advertise it. See [screen connection modes](screen-control.md#session-window).
+For MCP/RCU remote-desktop work, the default connection policy and the skill
+explicitly use `video:true,showWindow:true`. A compatible native app must open a
+real interactive remote window on the controller, with local mouse/keyboard
+forwarding and the normal toolbar, subject to existing host input permissions;
+an observation-only window does not satisfy this policy. Manual and AI input
+share that window: pause AI input during user interaction, then re-observe after
+handback before resuming. Native MCP/agent ownership (`agentControlMode`), session
+IDs and cleanup are retained. Closing the real window ends its owned MCP session
+and initiates owned-terminal/held-input cleanup; do not silently reconnect.
+
+Clipboard is independent and remains disabled for MCP ownership, including
+automatic capture/sync. Window visibility does not enable audio; microphone,
+overlay and recording settings are unchanged. Do not promise automatic clipboard
+or audio. Headless (`video:true,showWindow:false`) or no-video (`video:false`,
+which also suppresses the window) work requires the user's explicit request.
+These are connection options, not installer settings or permission changes.
+Discover the native schema first. If `showWindow` is missing or the build only
+opens an observation-only window, stop desktop input and request a compatible app
+update instead of silently omitting the option or using headless mode.
+See [screen connection modes](screen-control.md#session-window).
 
 ## 2. Install the Skill
 

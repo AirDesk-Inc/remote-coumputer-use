@@ -81,9 +81,9 @@ retains full-PNG coordinates, actual cursor telemetry, bounded key repeat/hold,
 and Windows/macOS window coordinates separately. New tools require the matching
 native app and negotiated target capability. Browser traversal exclusions, tab
 activation, bounded semantic editing and persistent local/remote debug settings
-are explicit. It also describes visible MCP observation windows by default,
-explicit headless/no-video modes, and window-close session cleanup. Their native
-runtime behavior must be verified separately from documentation/package checks.
+are explicit. The observation-only window guidance at that checkpoint is
+superseded by the interactive-window policy below. Native runtime behavior must
+be verified separately from documentation/package checks.
 This package change does not install a native app, modify in-app
 consent, configure a real user profile, publish npm or prove two-computer input.
 
@@ -92,6 +92,38 @@ against their SHA-512 integrity values to generate the shipped SHA-256 upgrade
 manifests. A known 0.1.0 Git source variant is separately identified. The complete
 previous skill directory is retained during upgrades; customization is rejected
 instead of overwritten.
+
+## Interactive Window Policy, 2026-10-31
+
+The default MCP/RCU remote-desktop policy and skill explicitly use
+`video:true,showWindow:true`. Visible connections must open a real interactive
+remote window with local mouse/keyboard forwarding and the normal toolbar,
+subject to existing host input permissions, not an observation-only window.
+Manual and AI input share it; pause AI input during user interaction and
+re-observe after handback. Native MCP/agent ownership, returned session IDs,
+owned-terminal/held-input cleanup and window-close session termination remain.
+Headless/no-video modes require the user's explicit request; an older build must
+not silently fall back or be treated as satisfying this policy.
+
+Authentication, current consent, host/input permissions and the target's shell
+terminal permission gate are unchanged. Clipboard is independent and remains
+disabled for MCP ownership, including automatic capture/sync. Window visibility
+does not enable audio; microphone, overlay and recording settings are unchanged.
+Do not promise automatic clipboard or audio. This documentation/installed-skill
+update does not change or verify native runtime behavior. Package checks cannot
+prove an interactive window, manual input forwarding, toolbar behavior or native
+ownership/cleanup; those require the opt-in checks below.
+
+Native checkpoint (2026-10-31, separate from npm publication): the macOS source
+implementation and signed installed app were updated. A fresh native stdio
+session returned the interactive connection description, `interactiveWindow:true`,
+`localInputReady:true`, input/video readiness and a STEAMDECK PNG. Focused input,
+policy, clipboard, close, cursor, stdio and GUI-lifetime tests passed. The user
+subsequently confirmed STEAMDECK remote interactions work. Repeated IDRs were
+reported separately and remain under investigation; input acceptance does not
+prove stable video recovery. No AI input was sent during the manual handoff.
+Linux's no-display SDL idle fixture passed,
+but live Linux/Windows controller acceptance and npm publication remain undone.
 
 ## Opt-In Acceptance Checklist
 
@@ -102,9 +134,19 @@ setup complete. Use a disposable app/document, not a live production workflow.
 - [ ] Leave target MCP OFF; confirm desktop/browser automation with approved input.
 - [ ] With target Remote Terminal OFF, ask its owner to enable it before shell work only.
 - [ ] Authenticate/approve the intended user; select the exact authorized target.
-- [ ] Connect with defaults; verify the controller's visible MCP observation window,
-      separate video/window status, current session/display and a changing screenshot.
-- [ ] Verify explicit headless observation and no-video mode only in an authorized test.
+- [ ] Verify omitted connection options default to `video:true,showWindow:true`;
+      verify the skill explicitly passes both true. Check separate video/window
+      status, current session/display and a changing screenshot.
+- [ ] Verify a real interactive remote window with the normal toolbar, not an
+      observation-only window. With AI input paused, test the controller's physical
+      mouse and keyboard under existing host input permissions. Hand back to AI,
+      take a fresh observation and verify MCP input on the same owned session.
+- [ ] Confirm native MCP/agent ownership and session ID continuity; closing the
+      window must not leave a separate unowned/manual session.
+- [ ] Verify clipboard remains independent/disabled for MCP ownership and the
+      visible window does not auto-enable audio or change microphone/overlay/recording.
+- [ ] Verify headless (`video:true,showWindow:false`) and no-video (`video:false`)
+      modes only when the user explicitly requests those acceptance tests.
 - [ ] Test resized-image-to-source coordinate mapping at center and corners.
 - [ ] Switch a display, wait for completion, and discard old coordinates.
 - [ ] Test click, key, composed text and key/button release in a test document.
@@ -115,7 +157,7 @@ setup complete. Use a disposable app/document, not a live production workflow.
 - [ ] Disable MCP in the controller app and verify controls stop. Check target
       permission revocation separately; do not claim remote attestation.
 - [ ] Confirm owned terminal/session cleanup, including cancellation/timeouts.
-- [ ] Close the owned MCP observation window and verify session end, held-input
+- [ ] Close the owned real remote window and verify session end, held-input
       release and owned-terminal cleanup without automatic reconnect.
 
 Record app/skill versions, OS, action, expected/observed result and limitations

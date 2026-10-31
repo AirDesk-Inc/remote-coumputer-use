@@ -92,14 +92,24 @@ This is a conversational shorthand. Explicit skill invocation remains
 `$remote-computer-use`; package, executable and MCP tool names are unchanged.
 The same setup and approval requirements apply to this shorthand.
 
-Current AirDesk builds show the remote screen in an **MCP observation window on
-the controller by default** (`video:true`, `showWindow:true`). The user can watch
-the agent's work while physical input forwarding, automatic clipboard capture,
-audio, microphone, overlay and recording remain off. Closing the window ends
-that MCP session and initiates terminal/held-input cleanup. Explicit
-`showWindow:false` retains video without a window; `video:false` disables both.
-These options require the matching native schema; installing the skill alone
-does not add them to an old app. See [connection modes](skills/remote-computer-use/references/screen-control.md#session-window).
+MCP/RCU remote-desktop connections must open a **real interactive remote window
+on the controller**, not an observation-only window. The default policy and the
+skill explicitly use `video:true,showWindow:true`, with local mouse/keyboard
+forwarding and the normal toolbar, subject to existing host input permissions.
+Manual and AI input share the window: pause AI input during user interaction,
+then re-observe after handback before resuming. Native MCP/agent ownership,
+session IDs and cleanup remain in force. Closing the real window ends its owned
+MCP session and initiates owned-terminal/held-input cleanup; do not silently reconnect.
+
+Clipboard is independent and remains disabled for MCP ownership, including
+automatic capture/sync. Opening the window does not enable audio; microphone,
+overlay and recording settings are unchanged. Do not expect automatic clipboard
+or audio. Headless (`video:true,showWindow:false`) and no-video (`video:false`,
+which also disables the window) modes require the user's explicit request.
+If the native schema lacks `showWindow` or the build only opens an observation-only
+window, stop desktop input and request a compatible app update instead of silently
+falling back. Installing the skill alone does not update the native app or prove
+interactive behavior. See [connection modes](skills/remote-computer-use/references/screen-control.md#session-window).
 
 ## Optional Local Check
 
